@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  font-family: Arial;
+}
+
+.container {
+  display: flex;
+}
+
+.sidebar {
+  width: 300px;
+  padding: 15px;
+  background: #f4f4f4;
+  height: 100vh;
+}
+
+#map {
+  flex: 1;
+  height: 100vh;
+}

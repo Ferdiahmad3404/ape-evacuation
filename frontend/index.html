@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>APE Evakuasi</title>
+  <meta charset="UTF-8" />
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="sidebar">
+    <h2>APE Evakuasi</h2>
+
+    <label>Kecepatan:</label>
+    <select id="speed">
+      <option value="1">Jalan Lambat</option>
+      <option value="1.5">Jalan Cepat</option>
+      <option value="2">Lari</option>
+    </select>
+
+    <label>RsT (menit):</label>
+    <input type="number" id="rst" value="10"/>
+
+    <button id="btnRoute">Hitung Rute</button>
+
+    <p>
+      Klik peta untuk <b>titik awal</b>, lalu pilih <b>titik evakuasi</b> dari marker hijau yang tersedia.
+    </p>
+
+    <div id="result"></div>
+  </div>
+
+  <div id="map"></div>
+
+</div>
+
+<script type="module" src="/main.js"></script>
+
+</body>
+</html>
