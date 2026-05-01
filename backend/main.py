@@ -1,10 +1,10 @@
 from csv import DictReader
 from io import StringIO
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from query import get_graph, get_evacuation_points, replace_evacuation_points, get_scenario
+from query import get_graph, get_evacuation_points, replace_evacuation_points, get_scenario, get_nodes
 import os
+from dijkstra import dijkstra, dijkstra_with_rst, reconstruct_path, get_nearest_node
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])
@@ -55,11 +55,45 @@ def upload_csv():
         replace_evacuation_points(new_points)
     elif (mode == "change-scenario"):
         print("Mode: Change Scenario")
-    elif (mode == "import-evacuees"):
-        print("Mode: Import Evacuees")
 
     return jsonify({
         "message": "CSV berhasil diupload",
+    }), 200
+
+@app.route("/simulation-evacuees", methods=["POST"])
+def receive_simulation_evacuees():
+    evacuees = request.get_json(silent=True) or []
+
+    dijkstra_results = []
+    G = get_graph()
+    nodes = get_nodes()
+    evacuation_points = get_evacuation_points()
+
+    for evacuee in evacuees:
+        start_node = get_nearest_node(nodes, evacuee["long"], evacuee["lat"])
+        evacuee_routes = []
+
+        for end_node in evacuation_points.keys():
+            times, previous_nodes = dijkstra(G, start_node, end_node, evacuee["speed"])
+            path = reconstruct_path(previous_nodes, start_node, end_node)
+            total_time = times.get(end_node, float("infinity"))
+
+            evacuee_routes.append({
+                "end_node": end_node,
+                "path": path,
+                "total_time": total_time if total_time != float("infinity") else None
+            })
+
+        dijkstra_results.append({
+            "evacuee_id": evacuee["id"],
+            "routes": evacuee_routes
+        })
+
+    print("finished processing evacuees")
+    return jsonify({
+        "message": "Data evacuee simulasi berhasil diterima",
+        "count": len(evacuees),
+        "results": dijkstra_results,
     }), 200
 
 if __name__ == "__main__":

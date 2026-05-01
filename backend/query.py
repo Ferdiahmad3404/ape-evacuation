@@ -112,4 +112,25 @@ def get_scenario():
         "y": y,
         "magnitude": magnitude
     }
+
+def get_nodes():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    nodes = {}
+
+    cur.execute("SELECT osmid, x, y FROM nodes")
+
+    rows = cur.fetchall()
+
+    for osmid, x, y in rows:
+        nodes[str(osmid)] = {
+            "x": x,
+            "y": y
+        }
+
+    cur.close()
+    conn.close()
+
+    return nodes
     

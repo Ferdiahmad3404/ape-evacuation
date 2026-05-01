@@ -53,7 +53,16 @@ body {
     background-color 0.2s ease,
     opacity 0.2s ease,
     transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 10px 0;
+  padding: 8px;
   cursor: pointer;
+  width: 100%;
+  font-size: 10px;
+  text-align: center;
 }
 
 .sidebar .btn.active {
@@ -75,20 +84,6 @@ body {
 
 .sidebar .btn.active:hover {
   background: #8a8a8a;
-}
-
-/* BUTTON */
-.sidebar .btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin: 10px 0;
-  padding: 8px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 10px;
-  text-align: center;
 }
 
 svg {
@@ -153,6 +148,8 @@ svg {
 #action-simulation {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  padding: 10px;
 }
 
 #action-simulation .data-item {
@@ -161,6 +158,65 @@ svg {
   justify-content: space-between;
   padding: 8px;
   border: 1px solid #000;
+}
+
+#action-simulation .simulation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#action-simulation .simulation-row.data-item {
+  display: block;
+  background: #fff;
+  border-radius: 8px;
+}
+
+#action-simulation .simulation-row-fields {
+  display: grid;
+  gap: 8px;
+}
+
+#action-simulation .simulation-row .field-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+#action-simulation .simulation-row .field-label {
+  min-width: 0;
+}
+
+#action-simulation .simulation-delete-row {
+  border: 1px solid #b81f2d;
+  background: #fff;
+  color: #b81f2d;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#action-simulation .simulation-delete-row:hover {
+  background: #fff0f2;
+}
+
+#action-simulation .simulation-add-row {
+  width: 100%;
+  border: 1px solid #1c274c;
+  background: #1c274c;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+#action-simulation .simulation-add-row:hover {
+  background: #243663;
 }
 
 .inline-input {
@@ -195,20 +251,6 @@ svg {
 .field-label {
   min-width: 46px;
   font-weight: 600;
-}
-
-.inline-input {
-  display: block;
-  width: 100%;
-  border: 1px solid #b8b8b8;
-  outline: none;
-  padding: 4px 8px;
-  margin: 2px 0;
-  border-radius: 6px;
-  background: #fff;
-  color: #111;
-  font: inherit;
-  cursor: text;
 }
 
 .inline-input:read-only {
@@ -276,8 +318,8 @@ svg {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  background: rgba(28, 39, 76, 0.08);
-  color: #1c274c;
+  background: #1c274c;
+  color: #fff;
 }
 
 .evacuation-meta {

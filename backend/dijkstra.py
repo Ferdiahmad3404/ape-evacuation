@@ -1,31 +1,30 @@
 import heapq
+from math import radians, sin, cos, sqrt, atan2
 
-def dijkstra(graph, start_node, end_node):
-    distances = {node: float('infinity') for node in graph}
-    distances[start_node] = 0
+def dijkstra(graph, start_node, end_node, walking_speed):
+    times = {node: float('infinity') for node in graph}
+    times[start_node] = 0
     priority_queue = [(0, start_node)]
     previous_nodes = {node: None for node in graph}
 
     while priority_queue:
-        current_distance, current_node = heapq.heappop(priority_queue)
+        current_time, current_node = heapq.heappop(priority_queue)
 
         if current_node == end_node:
             break
 
-        if current_distance > distances[current_node]:
+        if current_time > times[current_node]:
             continue
 
         for neighbor, data in graph[current_node].items():
-            distance = current_distance + data['cost']
+            edge_time = data['cost'] / walking_speed
 
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
+            if edge_time < times[neighbor]:
+                times[neighbor] = edge_time
                 previous_nodes[neighbor] = current_node
-                heapq.heappush(priority_queue, (distance, neighbor))
+                heapq.heappush(priority_queue, (edge_time, neighbor))
 
-    return distances, previous_nodes
-
-import heapq
+    return times, previous_nodes
 
 def dijkstra_with_rst(graph, start_node, end_node, t_warning, t_reaction, walking_speed):
     times = {node: float('infinity') for node in graph}
@@ -71,3 +70,36 @@ def reconstruct_path(previous_nodes, start_node, end_node):
         return []
 
     return path
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+
+    R = 6371.0
+
+    lat1_rad = radians(lat1)
+    lon1_rad = radians(lon1)
+    lat2_rad = radians(float(lat2))
+    lon2_rad = radians(float(lon2))
+
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+
+    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+def get_nearest_node(nodes, long, lat):
+    nearest_node = None
+    min_distance = float('infinity')
+
+    for node_id, data in nodes.items():
+        node_long = data['x']
+        node_lat = data['y']
+        distance = haversine_distance(lat, long, node_lat, node_long)
+
+        if distance < min_distance:
+            min_distance = distance
+            nearest_node = node_id
+
+    return nearest_node

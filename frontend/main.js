@@ -112,6 +112,14 @@ const panelUrls = {
   evacuation: "http://localhost:5000/evacuation-points",
 };
 
+function createEmptySimulationRow() {
+  return {
+    lat: "",
+    long: "",
+    speed: "",
+  };
+}
+
 function getPanelFromPath(pathname = window.location.pathname) {
   const route = pathname.replace(/^\/+|\/+$/g, "");
 
@@ -143,7 +151,45 @@ function syncPanelUrl(panel, replaceState = false) {
   }
 }
 
+let simulationRows = [createEmptySimulationRow()];
 let simulationData = [];
+
+function renderSimulationRows() {
+  return simulationRows
+    .map((row, index) => renderSimulationRow(row, index))
+    .join("");
+}
+
+function setSimulationRows(rows) {
+  if (Array.isArray(rows) && rows.length > 0) {
+    simulationRows = rows.map((row) => ({
+      lat: row.lat ?? "",
+      long: row.long ?? "",
+      speed: row.speed ?? "",
+    }));
+  } else {
+    simulationRows = [createEmptySimulationRow()];
+  }
+
+  simulationData = [];
+  sectionAction.innerHTML = renderSimulationAction();
+  dataContainer.innerHTML = renderPanelData("simulation");
+}
+
+function buildSimulationPayload() {
+  return simulationRows
+    .map((row) => ({
+      lat: Number(row.lat),
+      long: Number(row.long),
+      speed: Number(row.speed),
+    }))
+    .filter(
+      (row) =>
+        Number.isFinite(row.lat) ||
+        Number.isFinite(row.long) ||
+        Number.isFinite(row.speed),
+    );
+}
 
 const addOverlay = document.createElement("div");
 addOverlay.id = "add-overlay";
@@ -243,32 +289,114 @@ overlaySave.addEventListener("click", () => {
   closeOverlay();
 });
 
-function renderSimulationData() {
-  if (simulationData.length === 0) {
-    return `<div class="data-item empty-state">Tidak ada evacuee</div>`;
+function renderSimulationRow(row, index) {
+  return `
+    <div class="data-item simulation-row card" data-row-index="${index}">
+      <div class="information">
+        <div class="card-header">
+          <span class="label">Evacuee ${index + 1}</span>
+          <button class="simulation-delete-row" type="button" data-row-index="${index}">
+            Delete
+          </button>
+        </div>
+
+        <div class="simulation-row-fields">
+          <label class="field-row">
+            <span class="field-label">Lat</span>
+            <input
+              class="inline-input simulation-input"
+              data-field="lat"
+              data-row-index="${index}"
+              type="number"
+              step="any"
+              placeholder="0.0000"
+              value="${row.lat}"
+            />
+          </label>
+
+          <label class="field-row">
+            <span class="field-label">Long</span>
+            <input
+              class="inline-input simulation-input"
+              data-field="long"
+              data-row-index="${index}"
+              type="number"
+              step="any"
+              placeholder="0.0000"
+              value="${row.long}"
+            />
+          </label>
+
+          <label class="field-row">
+            <span class="field-label">Speed</span>
+            <input
+              class="inline-input simulation-input"
+              data-field="speed"
+              data-row-index="${index}"
+              type="number"
+              step="any"
+              placeholder="0.0000"
+              value="${row.speed}"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function resetSimulationRows(count = 1) {
+  simulationRows = [];
+
+  for (let index = 0; index < count; index += 1) {
+    simulationRows.push(createEmptySimulationRow());
   }
 
-  return simulationData
-    .map(
-      (item, index) => `
-        <div class="data-item simulation">
-          <div class="information">
-            <span class="label">Evacuee ${index + 1}</span>
-            <div class="value" id="simulation-${index + 1}-information">
-              Lat: ${item.lat.toFixed(4)}, Long: ${item.long.toFixed(4)}, Speed: ${item.speed.toFixed(4)}
-            </div>
-          </div>
-        </div>
-      `,
-    )
-    .join("");
+  if (simulationRows.length === 0) {
+    simulationRows.push(createEmptySimulationRow());
+  }
+
+  simulationData = [];
+}
+
+function renderSimulationAction() {
+  return `
+    <div id="action-simulation">
+      <div class="btn data-item" id="import-evacuees">
+        <span>Import Evacuees</span>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+          <g id="SVGRepo_iconCarrier">
+            <path d="M12 4L12 14M12 14L15 11M12 14L9 11" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 20C7.58172 20 4 16.4183 4 12M20 12C20 14.5264 18.8289 16.7792 17 18.2454" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path>
+          </g>
+        </svg>
+      </div>
+
+      <div class="simulation-form">
+        ${renderSimulationRows()}
+
+        <button class="simulation-add-row" id="add-simulation-row" type="button">
+          Tambah evacuee
+        </button>
+      </div>
+
+      <div class="btn data-item" id="start-simulation">
+        <span>Start Simulation</span>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+          <g id="SVGRepo_iconCarrier">
+            <path d="M5 3L19 12L5 21V3Z" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+      </div>
+    </div>
+  `;
 }
 
 function renderPanelData(panel, data) {
-  if (panel === "simulation") {
-    return renderSimulationData();
-  }
-
   if (panel === "scenario") {
     const scenario = Array.isArray(data) ? data : [data];
     if (scenario.length === 0) {
@@ -405,7 +533,8 @@ function getPanelUrl(panel) {
 }
 
 async function updateMainContent(panel) {
-  sectionAction.innerHTML = views[panel].action;
+  sectionAction.innerHTML =
+    panel === "simulation" ? renderSimulationAction() : views[panel].action;
   dataContainer.innerHTML = `<div class="data-item">Loading...</div>`;
 
   if (panel === "simulation") {
@@ -450,6 +579,77 @@ sidebarButtons.forEach((btn) => {
   });
 });
 
+sectionAction.addEventListener("input", (event) => {
+  const input = event.target.closest(".simulation-input");
+  if (!input) return;
+
+  const rowIndex = Number(input.dataset.rowIndex);
+  const field = input.dataset.field;
+  if (!Number.isInteger(rowIndex) || !field || !simulationRows[rowIndex]) {
+    return;
+  }
+
+  simulationRows[rowIndex] = {
+    ...simulationRows[rowIndex],
+    [field]: input.value,
+  };
+});
+
+sectionAction.addEventListener("click", async (event) => {
+  const addRowButton = event.target.closest("#add-simulation-row");
+  if (addRowButton) {
+    simulationRows = [...simulationRows, createEmptySimulationRow()];
+    sectionAction.innerHTML = renderSimulationAction();
+    return;
+  }
+
+  const deleteRowButton = event.target.closest(".simulation-delete-row");
+  if (deleteRowButton) {
+    const rowIndex = Number(deleteRowButton.dataset.rowIndex);
+
+    if (Number.isInteger(rowIndex) && simulationRows[rowIndex]) {
+      simulationRows = simulationRows.filter((_, index) => index !== rowIndex);
+
+      if (simulationRows.length === 0) {
+        simulationRows = [createEmptySimulationRow()];
+      }
+
+      sectionAction.innerHTML = renderSimulationAction();
+    }
+
+    return;
+  }
+
+  const startButton = event.target.closest("#start-simulation");
+  if (!startButton) return;
+
+  const payload = buildSimulationPayload();
+
+  if (payload.length === 0) {
+    alert("Tambahkan minimal satu evacuee terlebih dahulu");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:5000/simulation-evacuees", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    simulationData = payload;
+    console.log("response", await response.json());
+  } catch (error) {
+    console.error("Error running simulation:", error);
+  }
+});
+
 window.addEventListener("popstate", () => {
   setActiveSidebar(getPanelFromPath(), { updateHistory: false });
 });
@@ -460,6 +660,13 @@ document.addEventListener("click", (event) => {
   );
 
   if (!importButton) return;
+});
+
+globalThis.addEventListener("simulation-csv-imported", (event) => {
+  const importedRows = Array.isArray(event.detail?.rows)
+    ? event.detail.rows
+    : [];
+  setSimulationRows(importedRows);
 });
 
 setActiveSidebar(getPanelFromPath(), { updateHistory: false });
