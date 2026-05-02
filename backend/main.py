@@ -69,14 +69,17 @@ def receive_simulation_evacuees():
     nodes = get_nodes()
     evacuation_points = get_evacuation_points()
 
-    for evacuee in evacuees:
+    for i, evacuee in enumerate(evacuees):
+        print(f"Processing evacuee {i+1}/{len(evacuees)}")
         start_node = get_nearest_node(nodes, evacuee["long"], evacuee["lat"])
         evacuee_routes = []
 
         for end_node in evacuation_points.keys():
+            print(f"Processing evacuee {i+1}/{len(evacuees)} to evacuation point {end_node}...")
             times, previous_nodes = dijkstra(G, start_node, end_node, evacuee["speed"])
             path = reconstruct_path(previous_nodes, start_node, end_node)
             total_time = times.get(end_node, float("infinity"))
+            print(f"Finished Dijkstra for evacuee {i+1}/{len(evacuees)} to evacuation point {end_node}. Total time: {total_time}")
 
             evacuee_routes.append({
                 "end_node": end_node,
@@ -85,7 +88,6 @@ def receive_simulation_evacuees():
             })
 
         dijkstra_results.append({
-            "evacuee_id": evacuee["id"],
             "routes": evacuee_routes
         })
 
@@ -94,6 +96,7 @@ def receive_simulation_evacuees():
         "message": "Data evacuee simulasi berhasil diterima",
         "count": len(evacuees),
         "results": dijkstra_results,
+        "evacuees": evacuees
     }), 200
 
 if __name__ == "__main__":

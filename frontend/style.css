@@ -259,6 +259,31 @@ svg {
   cursor: default;
 }
 
+.evacuee-marker {
+  background: transparent;
+  border: 0;
+}
+
+.evacuee-marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: #1c274c;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+}
+
+.evacuee-marker-pin span {
+  transform: rotate(45deg);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .overlay {
   position: fixed;
   inset: 0;

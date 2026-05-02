@@ -2,7 +2,7 @@ import heapq
 from math import radians, sin, cos, sqrt, atan2
 
 def dijkstra(graph, start_node, end_node, walking_speed):
-    times = {node: float('infinity') for node in graph}
+    times = {node: float('inf') for node in graph}
     times[start_node] = 0
     priority_queue = [(0, start_node)]
     previous_nodes = {node: None for node in graph}
@@ -18,11 +18,12 @@ def dijkstra(graph, start_node, end_node, walking_speed):
 
         for neighbor, data in graph[current_node].items():
             edge_time = data['cost'] / walking_speed
+            new_time = current_time + edge_time
 
-            if edge_time < times[neighbor]:
-                times[neighbor] = edge_time
+            if new_time < times[neighbor]:
+                times[neighbor] = new_time
                 previous_nodes[neighbor] = current_node
-                heapq.heappush(priority_queue, (edge_time, neighbor))
+                heapq.heappush(priority_queue, (new_time, neighbor))
 
     return times, previous_nodes
 

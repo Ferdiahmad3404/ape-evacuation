@@ -5,6 +5,7 @@ import "./style.css";
 // init map
 const map = L.map("map").setView([-0.95, 100.35], 13);
 const evacuationPointLayer = L.layerGroup().addTo(map);
+const evacueeLayer = L.layerGroup().addTo(map);
 
 // Icon setting
 const evacuationPointIcon = L.icon({
@@ -29,6 +30,18 @@ const scenarioEventIcon = L.icon({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [30, 30],
   shadowSize: [0, 0],
+});
+
+const evacueeMarkerIcon = L.divIcon({
+  className: "evacuee-marker",
+  html: `
+    <div class="evacuee-marker-pin">
+      <span>E</span>
+    </div>
+  `,
+  iconSize: [30, 40],
+  iconAnchor: [15, 38],
+  popupAnchor: [0, -32],
 });
 
 // basemap
@@ -120,8 +133,8 @@ function createEmptySimulationRow() {
   };
 }
 
-function getPanelFromPath(pathname = window.location.pathname) {
-  const route = pathname.replace(/^\/+|\/+$/g, "");
+function getPanelFromPath(pathname = globalThis.location.pathname) {
+  const route = pathname.replaceAll(/^\/+|\/+$/g, "");
 
   if (!route || route === "index.html") {
     return "simulation";
@@ -131,7 +144,11 @@ function getPanelFromPath(pathname = window.location.pathname) {
     return "evacuation";
   }
 
-  if (Object.prototype.hasOwnProperty.call(views, route)) {
+  if (route === "result") {
+    return "result";
+  }
+
+  if (Object.hasOwn(views, route)) {
     return route;
   }
 
@@ -142,17 +159,18 @@ function syncPanelUrl(panel, replaceState = false) {
   const nextPath = `/${panel}`;
 
   if (replaceState) {
-    window.history.replaceState({ panel }, "", nextPath);
+    globalThis.history.replaceState({ panel }, "", nextPath);
     return;
   }
 
-  if (window.location.pathname !== nextPath) {
-    window.history.pushState({ panel }, "", nextPath);
+  if (globalThis.location.pathname !== nextPath) {
+    globalThis.history.pushState({ panel }, "", nextPath);
   }
 }
 
 let simulationRows = [createEmptySimulationRow()];
 let simulationData = [];
+let simulationResult = null;
 
 function renderSimulationRows() {
   return simulationRows
@@ -190,104 +208,6 @@ function buildSimulationPayload() {
         Number.isFinite(row.speed),
     );
 }
-
-const addOverlay = document.createElement("div");
-addOverlay.id = "add-overlay";
-addOverlay.className = "overlay hidden";
-addOverlay.innerHTML = `
-  <div class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
-    <h3 id="overlay-title"></h3>
-    <div id="overlay-body"></div>
-    <div class="overlay-actions">
-      <button type="button" id="overlay-cancel">Batal</button>
-      <button type="button" id="overlay-save">Simpan</button>
-    </div>
-  </div>
-`;
-document.body.appendChild(addOverlay);
-
-const overlayTitle = addOverlay.querySelector("#overlay-title");
-const overlayBody = addOverlay.querySelector("#overlay-body");
-const overlayCancel = addOverlay.querySelector("#overlay-cancel");
-const overlaySave = addOverlay.querySelector("#overlay-save");
-
-let overlayMode = "";
-
-function renderOverlayForm(mode) {
-  if (mode === "evacuee") {
-    overlayTitle.textContent = "Tambah Evacuee";
-    overlayBody.innerHTML = `
-      <div class="field-row">
-        <span class="field-label">Lat:</span>
-        <input class="inline-input" id="overlay-lat" type="number" step="0.0001" value="0.0000" />
-      </div>
-      <div class="field-row">
-        <span class="field-label">Long:</span>
-        <input class="inline-input" id="overlay-long" type="number" step="0.0001" value="0.0000" />
-      </div>
-      <div class="field-row">
-        <span class="field-label">Speed:</span>
-        <input class="inline-input" id="overlay-speed" type="number" step="0.0001" value="0.0000" />
-      </div>
-    `;
-    return;
-  }
-
-  overlayTitle.textContent = "Tambah Evacuation Point";
-  overlayBody.innerHTML = `
-    <div class="field-row">
-      <span class="field-label">Lat:</span>
-      <input class="inline-input" id="overlay-lat" type="number" step="0.0001" value="0.0000" />
-    </div>
-    <div class="field-row">
-      <span class="field-label">Long:</span>
-      <input class="inline-input" id="overlay-long" type="number" step="0.0001" value="0.0000" />
-    </div>
-  `;
-}
-
-function openOverlay(mode) {
-  overlayMode = mode;
-  renderOverlayForm(mode);
-  addOverlay.classList.remove("hidden");
-}
-
-function closeOverlay() {
-  addOverlay.classList.add("hidden");
-  overlayMode = "";
-}
-
-overlayCancel.addEventListener("click", closeOverlay);
-
-addOverlay.addEventListener("click", (event) => {
-  if (event.target === addOverlay) {
-    closeOverlay();
-  }
-});
-
-overlaySave.addEventListener("click", () => {
-  if (overlayMode === "evacuee") {
-    const lat = Number(document.getElementById("overlay-lat")?.value);
-    const long = Number(document.getElementById("overlay-long")?.value);
-    const speed = Number(document.getElementById("overlay-speed")?.value);
-
-    if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(long) ||
-      !Number.isFinite(speed)
-    ) {
-      alert("Input evacuee harus angka valid");
-      return;
-    }
-
-    simulationData.push({ lat, long, speed });
-    closeOverlay();
-    updateMainContent("simulation");
-    return;
-  }
-
-  closeOverlay();
-});
 
 function renderSimulationRow(row, index) {
   return `
@@ -394,6 +314,79 @@ function renderSimulationAction() {
       </div>
     </div>
   `;
+}
+
+function renderSimulationResultData(result) {
+  const evacuees = Array.isArray(result?.evacuees) ? result.evacuees : [];
+
+  if (evacuees.length === 0) {
+    return `<div class="data-item empty-state">Tidak ada data evacuee dari API</div>`;
+  }
+
+  return evacuees
+    .map(
+      (evacuee, index) => `
+        <div class="data-item evacuation-points card">
+          <div class="information">
+            <div class="card-header">
+              <span class="label">Evacuee ${index + 1}</span>
+              <span class="badge">API Result</span>
+            </div>
+
+            <div class="value evacuation-meta">
+              <div class="meta-row">
+                <span class="meta-label">Lat</span>
+                <span class="meta-value">${evacuee.lat ?? "-"}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Long</span>
+                <span class="meta-value">${evacuee.long ?? "-"}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Speed</span>
+                <span class="meta-value">${evacuee.speed ?? "-"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+    )
+    .join("");
+}
+
+function renderEvacueeMarkers(result) {
+  const evacuees = Array.isArray(result?.evacuees) ? result.evacuees : [];
+
+  evacueeLayer.clearLayers();
+
+  const boundsPoints = [];
+
+  evacuees.forEach((evacuee, index) => {
+    const lat = Number(evacuee.lat);
+    const lng = Number(evacuee.long);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return;
+    }
+
+    boundsPoints.push([lat, lng]);
+
+    L.marker([lat, lng], { icon: evacueeMarkerIcon })
+      .bindPopup(
+        `<strong>Evacuee ${index + 1}</strong><br />
+        Lat: ${lat}<br />
+        Long: ${lng}<br />
+        Speed: ${evacuee.speed ?? "-"}`,
+      )
+      .addTo(evacueeLayer);
+  });
+
+  if (boundsPoints.length > 0) {
+    const bounds = L.latLngBounds(boundsPoints);
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [30, 30] });
+    }
+  }
 }
 
 function renderPanelData(panel, data) {
@@ -546,7 +539,7 @@ async function updateMainContent(panel) {
   if (!url) return;
 
   try {
-    const response = await window.fetch(url);
+    const response = await globalThis.fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -644,13 +637,17 @@ sectionAction.addEventListener("click", async (event) => {
     }
 
     simulationData = payload;
-    console.log("response", await response.json());
+    simulationResult = await response.json();
+    console.log("Simulation result:", simulationResult);
+    renderEvacueeMarkers(simulationResult);
+    sectionAction.innerHTML = "";
+    dataContainer.innerHTML = renderSimulationResultData(simulationResult);
   } catch (error) {
     console.error("Error running simulation:", error);
   }
 });
 
-window.addEventListener("popstate", () => {
+globalThis.addEventListener("popstate", () => {
   setActiveSidebar(getPanelFromPath(), { updateHistory: false });
 });
 
@@ -670,6 +667,6 @@ globalThis.addEventListener("simulation-csv-imported", (event) => {
 });
 
 setActiveSidebar(getPanelFromPath(), { updateHistory: false });
-if (window.location.pathname !== `/${getPanelFromPath()}`) {
+if (globalThis.location.pathname !== `/${getPanelFromPath()}`) {
   syncPanelUrl(getPanelFromPath(), true);
 }
