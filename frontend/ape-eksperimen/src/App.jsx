@@ -1,122 +1,109 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+import Sidebar from "./components/layout/Sidebar";
+import Simulation from "./components/layout/Simulation";
+import Dataset from "./components/layout/Dataset";
+import Result from "./components/layout/Result";
+import Scenario from "./components/layout/Scenario";
+import Departure from "./components/layout/Departure";
+import MapFlyTo from "./components/layout/MapFlyTo";
+import RouteLines from "./components/layout/RouteLines";
 
-      <div className="ticks"></div>
+import "./App.css";
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+/* handle click leaflet */
+function MapClickHandler({ mapPickTargetId, onMapSelect }) {
+  useMapEvents({
+    click(event) {
+      if (mapPickTargetId == null) return;
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      onMapSelect({
+        rowId: mapPickTargetId,
+        latitude: event.latlng.lat,
+        longitude: event.latlng.lng,
+      });
+    },
+  });
+
+  return null;
 }
 
-export default App
+function App() {
+  const [mapSelection, setMapSelection] = useState(null);
+  const [mapPickTargetId, setMapPickTargetId] = useState(null);
+  const [routesToShow, setRoutesToShow] = useState([]);
+  const [mapCenter, setMapCenter] = useState([-6.2, 106.816666]);
+  const [mapZoom, setMapZoom] = useState(13);
+
+  const handleMapSelect = (data) => {
+    setMapSelection(data);
+    setMapPickTargetId(null);
+  };
+
+  return (
+    <BrowserRouter>
+      <main className="app-shell">
+        <Sidebar />
+
+        <section className="map-panel">
+          <MapContainer
+            center={mapCenter}
+            zoom={mapZoom}
+            className="leaflet-map"
+          >
+            <TileLayer
+              attribution="&copy; OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            <MapClickHandler
+              mapPickTargetId={mapPickTargetId}
+              onMapSelect={handleMapSelect}
+            />
+            <MapFlyTo center={mapCenter} zoom={mapZoom} />
+
+            <RouteLines routes={routesToShow} />
+          </MapContainer>
+        </section>
+
+        <Routes>
+          <Route
+            path="/simulation"
+            element={
+              <Simulation
+                mapSelection={mapSelection}
+                mapPickTargetId={mapPickTargetId}
+                onRequestMapPick={setMapPickTargetId}
+              />
+            }
+          />
+
+          <Route path="/dataset" element={<Dataset />} />
+
+          <Route path="/result" element={<Result />} />
+
+          <Route path="/result/:scenario_id" element={<Scenario />} />
+
+          <Route
+            path="/result/:scenario_id/:departure_point_id"
+            element={
+              <Departure
+                onShowRoutes={setRoutesToShow}
+                onMapFocus={(position) => {
+                  setMapCenter(position);
+                  setMapZoom(15);
+                }}
+              />
+            }
+          />
+        </Routes>
+      </main>
+    </BrowserRouter>
+  );
+}
+
+export default App;

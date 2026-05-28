@@ -1,0 +1,203 @@
+/* =========================
+   SCENARIO PANEL
+========================= */
+.scenario {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+
+  width: 22%;
+  min-width: 340px;
+  max-width: 420px;
+
+  height: calc(100vh - 32px);
+
+  z-index: 1000;
+
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+
+  border-radius: 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: visible;
+}
+
+/* =========================
+   DEPARTURE PANEL
+========================= */
+.departure {
+  position: fixed;
+
+  top: 16px;
+  right: 16px;
+
+  width: 560px;
+  max-width: calc(100vw - 32px);
+
+  height: calc(100vh - 32px);
+
+  z-index: 1000;
+
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+
+  border-radius: 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: visible;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .scenario,
+  .departure {
+    top: 8px;
+    right: 8px;
+
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+
+    max-width: none;
+
+    transform: none;
+  }
+}
+
+/* =========================
+   BORDER UTIL
+========================= */
+.border {
+  border: 1px solid #d9d9d9;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.border-left {
+  border-left: 1px solid #e5e7eb;
+}
+
+/* =========================
+   TABLE
+========================= */
+.table-header {
+  display: flex;
+
+  width: 100%;
+
+  background-color: #f8fafc;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 2;
+}
+
+.table-row {
+  display: flex;
+  width: 100%;
+
+  transition: background-color 0.15s ease;
+}
+
+.table-col {
+  min-width: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.evacuation-col {
+  flex: 1.1;
+}
+
+.algorithm-col {
+  flex: 1;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.departure-item-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.departure-item-text {
+  font-size: 13px;
+  color: #555;
+}
+
+/* =========================
+   CLICKABLE
+========================= */
+.selectable-cell {
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    transform 0.12s ease;
+}
+
+.selectable-cell:hover {
+  background-color: #f5f7fa;
+}
+
+/* =========================
+   SELECTED
+========================= */
+.selected-row {
+  background-color: #edf4ff;
+}
+
+.selected-cell {
+  background-color: #dbeafe;
+}
+
+/* =========================
+   HEADER AREA
+========================= */
+.panel-header {
+  padding: 12px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: white;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 3;
+}
+
+/* =========================
+   SCROLL AREA
+========================= */
+.table-body {
+  flex: 1;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* =========================
+   MANTINE SELECT FIX
+========================= */
+.mantine-Select-dropdown {
+  z-index: 9999 !important;
+}

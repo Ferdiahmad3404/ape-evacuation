@@ -1,0 +1,68 @@
+.simulation {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  bottom: 16px;
+  transform: translateY(-50%);
+  z-index: 1000;
+  width: fit-content;
+  height: calc(100svh - 120px);
+  max-width: calc(100vw - 120px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 720px) {
+  .simulation {
+    top: 50%;
+    right: 16px;
+    bottom: 16px;
+    transform: translateY(-50%);
+    width: fit-content;
+    height: calc(100svh - 120px);
+    max-width: calc(100vw - 120px);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+.border {
+  border: 1px solid #000000;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #000000;
+}
+
+.border-y {
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+}
+
+.simulation-list {
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.simulation-row {
+  border-radius: 12px;
+}
+
+.simulation-field {
+  display: flex;
+  flex: 1 1 160px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.simulation-field input {
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  background: #ffffff;
+}
