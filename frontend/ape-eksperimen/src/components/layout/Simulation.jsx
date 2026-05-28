@@ -114,15 +114,37 @@ function Simulation({
     );
   }, [mapSelection]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const payload = departurePoints.map((point) => ({
-      latitude: point.lat,
-      longitude: point.lng,
+      latitude: Number(point.lat),
+      longitude: Number(point.lng),
     }));
 
-    console.log("Departure points payload:", payload);
+    try {
+      const response = await fetch("http://localhost:5000/api/simulations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data);
+        alert(data.message || "Simulation gagal");
+        return;
+      }
+
+      console.log("Simulation result:", data);
+      alert("Simulation berhasil");
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan koneksi");
+    }
   };
 
   const handleAddPoint = () => {

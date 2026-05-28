@@ -1,7 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  useMapEvents,
+  Marker,
+  Popup,
+} from "react-leaflet";
+
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import Sidebar from "./components/layout/Sidebar";
@@ -14,6 +22,16 @@ import MapFlyTo from "./components/layout/MapFlyTo";
 import RouteLines from "./components/layout/RouteLines";
 
 import "./App.css";
+
+/* fix default marker icon */
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 /* handle click leaflet */
 function MapClickHandler({ mapPickTargetId, onMapSelect }) {
@@ -38,6 +56,26 @@ function App() {
   const [routesToShow, setRoutesToShow] = useState([]);
   const [mapCenter, setMapCenter] = useState([-6.2, 106.816666]);
   const [mapZoom, setMapZoom] = useState(13);
+
+  const [evacuationPoints, setEvacuationPoints] = useState([]);
+
+  useEffect(() => {
+    const fetchEvacuationPoints = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/nodes/evacuation_points",
+        );
+
+        const data = await response.json();
+
+        setEvacuationPoints(data.evacuation_points || []);
+      } catch (error) {
+        console.error("Failed to fetch evacuation points:", error);
+      }
+    };
+
+    fetchEvacuationPoints();
+  }, []);
 
   const handleMapSelect = (data) => {
     setMapSelection(data);
@@ -64,9 +102,28 @@ function App() {
               mapPickTargetId={mapPickTargetId}
               onMapSelect={handleMapSelect}
             />
+
             <MapFlyTo center={mapCenter} zoom={mapZoom} />
 
             <RouteLines routes={routesToShow} />
+
+            {/* evacuation point markers */}
+            {evacuationPoints.map((point) => (
+              <Marker
+                key={point.id}
+                position={[point.latitude, point.longitude]}
+              >
+                <Popup>
+                  <div>
+                    <strong>{point.node_id}</strong>
+                    <br />
+                    Latitude: {point.latitude}
+                    <br />
+                    Longitude: {point.longitude}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
         </section>
 
