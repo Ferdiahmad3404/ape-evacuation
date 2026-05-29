@@ -19,7 +19,7 @@ def transform_to_graph(nodes_df, edges_df):
     for _, row in edges_df.iterrows():
         u = row["u"]
         v = row["v"]
-        weight = row["length"]
+        length = row["length"]
 
         if u not in graph:
             graph[u] = {}
@@ -27,8 +27,8 @@ def transform_to_graph(nodes_df, edges_df):
         if v not in graph:
             graph[v] = {}   
 
-        graph[u][v] = weight
-        graph[v][u] = weight
+        graph[u][v] = length
+        graph[v][u] = length
 
     eta_map = dict(
         zip(
@@ -43,7 +43,7 @@ def transform_to_graph(nodes_df, edges_df):
 
         neighbors_with_eta = {
             k: {
-                "cost": weight,
+                "length": weight,
                 "eta": eta_map.get(str(k), None)
             }
             for k, weight in neighbors.items()

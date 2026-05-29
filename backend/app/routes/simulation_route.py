@@ -1,8 +1,12 @@
 from flask import Blueprint, json, jsonify, request
+
+from ..services.edge_service import EdgeService
 from ..services.graph_service import GraphService
 from ..services.node_service import NodeService
-from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path
+from ..services.result_service import ResultService
+from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id, split_geometry_into_safe_and_unsafe
 
+import uuid
 
 simulation_bp = Blueprint("simulation", __name__)
 
@@ -18,74 +22,66 @@ def create_simulation():
     
     print("Payload diterima:", payload)
     
-    walking_speeds = [5.0]
+    walking_speeds = [0.8, 1.2, 1.6]
 
     graph_data = GraphService.get_all_graphs()
-    graph = {}
-
-    for item in graph_data:
-        graph[item.node] = json.loads(
-            item.neighbors.replace("Infinity", "null")
-        )
 
     nodes_data = NodeService.get_all_nodes()
-    nodes = [node.to_dict() for node in nodes_data]
 
-    evacuation_points = NodeService.get_node_evacuation_point()
-    evacuation_point_ids = [evac_point.node_id for evac_point in evacuation_points]
+    edges_data = EdgeService.get_all_edges()
+
+    evacuation_points_data = NodeService.get_all_node_evacuation_points()
+
 
     for departure_point in payload:
+        person_id = uuid.uuid4().hex
         for walking_speed in walking_speeds:
-            for evac_point_id in evacuation_point_ids:
+            for evac_point_id, evac_point in evacuation_points_data.items():
 
                 start_node_id = find_nearest_node(
-                    nodes,
+                    nodes_data,
                     departure_point["latitude"],
                     departure_point["longitude"]
                 )
 
-                dist, prev = dijkstra(
-                    graph,
+                dist_dijkstra, prev_dijkstra = dijkstra(
+                    graph_data,
                     start_node_id,
                     evac_point_id,
                     walking_speed
                 )
 
-                path = reconstruct_path(prev, start_node_id, evac_point_id)
+                path_dijkstra = reconstruct_path(prev_dijkstra, start_node_id, evac_point_id)
 
-                dist_rst, prev_rst = dijkstra_with_rst(
-                    graph,
+                geometries_dijkstra = get_geometry_by_node_id(edges_data, path_dijkstra)
+
+                geometries_dijkstra = split_geometry_into_safe_and_unsafe(geometries_dijkstra, walking_speed, 0.40)
+
+                dist_dijkstra_rst, prev_dijkstra_rst = dijkstra_with_rst(
+                    graph_data,
                     start_node_id,
                     evac_point_id,
                     5,
-                    1,
+                    10,
                     walking_speed,
                 )
 
-                with open("trace_dijkstra_rst.txt", "w", encoding="utf-8") as file:
-                    file.write(
-                        json.dumps(
-                            {
-                                "departure_point": departure_point,
-                                "speed": walking_speed,
-                                "evac_point_id": evac_point_id,
-                                "start_node_id": start_node_id,
-                                "dist_rst": dist_rst,
-                                "prev_rst": prev_rst,
-                            },
-                            indent=2,
-                            ensure_ascii=False
-                        )
-                    )
-                    file.write("\n====================\n")
+                path_dijkstra_rst = reconstruct_path(prev_dijkstra_rst, start_node_id, evac_point_id)
 
-                return jsonify({
-                    "message": "Payload diterima",
-                }), 200
+                geometries_dijkstra_rst = get_geometry_by_node_id(edges_data, path_dijkstra_rst)
+
+                ResultService.save_result(
+                    person_id,
+                    dist_dijkstra[evac_point_id],
+                    json.dumps(geometries_dijkstra),
+                    dist_dijkstra_rst[evac_point_id],
+                    json.dumps({
+                        "safe": geometries_dijkstra_rst,
+                        "unsafe": []
+                    }),
+                    movement_speed=walking_speed
+                )
 
     return jsonify({
         "message": "Payload diterima",
-        "data": {
-            "graph": graph,
-        }
     }), 200

@@ -1,4 +1,6 @@
-import math
+import math, json
+
+import json
 
 def dijkstra(graph, source, target, walking_speed):
     dist = {}
@@ -22,12 +24,17 @@ def dijkstra(graph, source, target, walking_speed):
         if u == target:
             break
 
-        for v, edge in graph[u].items():
+        neighbors = graph[u]["neighbors"]
+
+        for v, edge in neighbors.items():
+
+            if v not in visited:
+                continue
 
             if visited[v]:
                 continue
-
-            alt = dist[u] + (edge['cost'] / walking_speed)
+            
+            alt = dist[u] + ((edge['length'] / walking_speed) / 60)
 
             if alt < dist[v]:
                 dist[v] = alt
@@ -48,6 +55,7 @@ def dijkstra_with_rst(
     prev = {}
     visited = {}
     queue = {}
+    count = 0
 
     for v in graph:
         dist[v] = float("inf")
@@ -69,17 +77,24 @@ def dijkstra_with_rst(
         queue[u] = False
         visited[u] = True
 
-        for v, edge in graph[u].items():
+        neighbors = graph[u]["neighbors"]
+
+        for v, edge in neighbors.items():
+
+            if v not in visited:
+                continue
 
             if visited.get(v, False):
                 continue
 
-            cost = edge["cost"]
-            rst = edge["eta"] - (t_warning + t_reaction)
+            if edge.get("eta") is not None:
+                rst = edge["eta"] - (t_warning + t_reaction)
+            else:
+                rst = float("inf")
 
-            alt = dist[u] + (cost / walking_speed)
+            alt = dist[u] + ((edge['length'] / walking_speed) / 60)
 
-            if alt >= rst and rst != float("inf"):
+            if not alt < rst:
                 continue
 
             if alt < dist[v]:
@@ -114,7 +129,7 @@ def find_nearest_node(nodes, latitude, longitude):
     nearest_node = None
     min_distance = float('inf')
 
-    for node in nodes:
+    for node_id, node in nodes.items():
         node_lat = node['latitude']
         node_lon = node['longitude']
 
@@ -126,3 +141,57 @@ def find_nearest_node(nodes, latitude, longitude):
                 nearest_node = node['node_id']
 
     return nearest_node
+
+def get_geometry_by_node_id(edges, node_ids):
+    geometries = []
+
+    for i, node_id in enumerate(node_ids[:-1]):
+        next_node = node_ids[i + 1]
+
+        for edge in edges.values():
+
+            if edge['u'] == node_id and edge['v'] == next_node:
+                geometry = json.loads(edge['geometry'])
+                geometries.append(geometry)
+                break
+
+    return geometries
+
+def geometry_distance(geometry):
+    total_distance = 0
+
+    for i in range(len(geometry) - 1):
+        total_distance += haversine_distance(
+            float(geometry[i][0]),
+            float(geometry[i][1]),
+            float(geometry[i + 1][0]),
+            float(geometry[i + 1][1])
+        )
+
+    return total_distance
+
+def split_geometry_into_safe_and_unsafe(
+    geometries,
+    walking_speed,
+    safe_time_threshold
+):
+    result = {
+        "safe": [],
+        "unsafe": []
+    }
+
+    cumulative_distance = 0
+
+    for geometry in geometries:
+        segment_distance = geometry_distance(geometry)
+        
+        cumulative_distance += segment_distance
+
+        travel_time = (cumulative_distance / walking_speed) / 60
+
+        if travel_time < safe_time_threshold:
+            result["safe"].append(geometry)
+        else:
+            result["unsafe"].append(geometry)
+
+    return result

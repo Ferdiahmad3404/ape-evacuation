@@ -1,0 +1,12 @@
+{
+  "evac_point": {
+    "eta": null,
+    "latitude": -0.803859853,
+    "longitude": 100.3351628,
+    "node_id": "EP1",
+    "status": "evacuation_point"
+  },
+  "evac_point_id": "EP1",
+  "start_node_id": "6049550879"
+}
+====================

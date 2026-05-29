@@ -8,7 +8,18 @@ import json
 class NodeService:
     @staticmethod
     def get_all_nodes():
-        return Node.query.order_by(Node.id.desc()).all()
+        nodes = Node.query.all()
+
+        return {
+            node.node_id: {
+                "eta": node.eta,
+                "latitude": node.latitude,
+                "longitude": node.longitude,
+                "node_id": node.node_id,
+                "status": node.status
+            }
+            for node in nodes
+        }
 
     @staticmethod
     def get_node_by_id(node_id):
@@ -16,17 +27,18 @@ class NodeService:
     
     @staticmethod
     def get_all_node_evacuation_points():
-        with open("trace_get_all_node_evacuation_points.json", "w", encoding="utf-8") as file:
-            evacuation_points = Node.query.filter_by(status="evacuation_point").all()
-            file.write(
-                json.dumps(
-                    [point.to_dict() for point in evacuation_points],
-                    indent=2,
-                    ensure_ascii=False
-                )
-            )
-            return evacuation_points
-        return Node.query.filter_by(status="evacuation_point").all()
+        nodes = Node.query.filter_by(status="evacuation_point").all()
+
+        return {
+            node.node_id: {
+                "eta": node.eta,
+                "latitude": node.latitude,
+                "longitude": node.longitude,
+                "node_id": node.node_id,
+                "status": node.status
+            }
+            for node in nodes
+        }
 
     @staticmethod
     def bulk_replace_nodes(nodes_data):

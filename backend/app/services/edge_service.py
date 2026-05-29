@@ -5,11 +5,17 @@ from ..models.edge import Edge
 class EdgeService:
     @staticmethod
     def get_all_edges():
-        return Edge.query.order_by(Edge.id.desc()).all()
+        edges = Edge.query.all()
 
-    @staticmethod
-    def get_edge_by_id(edge_id):
-        return Edge.query.get(edge_id)
+        return {
+            edge.u + "_" + edge.v: {
+                "u": edge.u,
+                "v": edge.v,
+                "length": edge.length,
+                "geometry": edge.geometry
+            }
+            for edge in edges
+        }
 
     @staticmethod
     def create_edge(edge_id, source_node_id, target_node_id, weight=None):

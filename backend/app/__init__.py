@@ -6,6 +6,7 @@ from .extensions import db
 from .routes.dataset_route import dataset_bp
 from .routes.simulation_route import simulation_bp
 from .routes.node_route import node_bp
+from .routes.scenario_route import scenario_bp
 
 
 def create_app():
@@ -19,6 +20,7 @@ def create_app():
     app.register_blueprint(dataset_bp, url_prefix="/api")
     app.register_blueprint(simulation_bp, url_prefix="/api")
     app.register_blueprint(node_bp, url_prefix="/api")
+    app.register_blueprint(scenario_bp, url_prefix="/api")
 
     with app.app_context():
         from .models import edge

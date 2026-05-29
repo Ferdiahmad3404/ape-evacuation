@@ -1,11 +1,22 @@
 from ..extensions import db
 from ..models.graph import Graph
 
-
+import json
 class GraphService:
+
     @staticmethod
     def get_all_graphs():
-        return Graph.query.all()
+        graphs = Graph.query.all()
+
+        return {
+            graph.node: {
+                "neighbors": json.loads(
+                    graph.neighbors.replace("NaN", "null")
+                ),
+                "node": graph.node
+            }
+            for graph in graphs
+    }
 
     @staticmethod
     def bulk_replace_graph(graph_data):

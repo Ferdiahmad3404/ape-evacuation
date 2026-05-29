@@ -23,7 +23,6 @@ import RouteLines from "./components/layout/RouteLines";
 
 import "./App.css";
 
-/* fix default marker icon */
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -33,7 +32,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/* handle click leaflet */
 function MapClickHandler({ mapPickTargetId, onMapSelect }) {
   useMapEvents({
     click(event) {
@@ -68,7 +66,7 @@ function App() {
 
         const data = await response.json();
 
-        setEvacuationPoints(data.evacuation_points || []);
+        setEvacuationPoints(Object.values(data));
       } catch (error) {
         console.error("Failed to fetch evacuation points:", error);
       }
@@ -107,10 +105,9 @@ function App() {
 
             <RouteLines routes={routesToShow} />
 
-            {/* evacuation point markers */}
             {evacuationPoints.map((point) => (
               <Marker
-                key={point.id}
+                key={point.node_id}
                 position={[point.latitude, point.longitude]}
               >
                 <Popup>
