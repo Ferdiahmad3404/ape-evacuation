@@ -55,7 +55,6 @@ def dijkstra_with_rst(
     prev = {}
     visited = {}
     queue = {}
-    count = 0
 
     for v in graph:
         dist[v] = float("inf")

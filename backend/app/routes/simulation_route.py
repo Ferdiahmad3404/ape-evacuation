@@ -4,6 +4,7 @@ from ..services.edge_service import EdgeService
 from ..services.graph_service import GraphService
 from ..services.node_service import NodeService
 from ..services.result_service import ResultService
+from ..services.person_service import PersonService
 from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id, split_geometry_into_safe_and_unsafe
 
 import uuid
@@ -20,8 +21,6 @@ def create_simulation():
             "message": "Payload tidak boleh kosong"
         }), 400
     
-    print("Payload diterima:", payload)
-    
     walking_speeds = [0.8, 1.2, 1.6]
 
     graph_data = GraphService.get_all_graphs()
@@ -33,8 +32,18 @@ def create_simulation():
     evacuation_points_data = NodeService.get_all_node_evacuation_points()
 
 
+    scenario_id = uuid.uuid4().hex
+
     for departure_point in payload:
         person_id = uuid.uuid4().hex
+
+        PersonService.create_person(
+            person_id=person_id,
+            scenario_id=scenario_id,
+            latitude=departure_point["latitude"],
+            longitude=departure_point["longitude"]
+        )
+
         for walking_speed in walking_speeds:
             for evac_point_id, evac_point in evacuation_points_data.items():
 
@@ -84,4 +93,5 @@ def create_simulation():
 
     return jsonify({
         "message": "Payload diterima",
+        "scenario_id": scenario_id
     }), 200

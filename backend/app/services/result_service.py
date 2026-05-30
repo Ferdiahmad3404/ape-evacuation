@@ -2,6 +2,13 @@ from ..extensions import db
 from ..models.result import Result
 
 class ResultService:
+
+    @staticmethod
+    def get_all_result_by_person_id(person_id):
+        result = Result.query.filter_by(person_id=person_id).all()
+
+        return [res.to_dict() for res in result]
+
     @staticmethod
     def save_result(person_id, ete_dijkstra, geometry_dijkstra, ete_dijkstra_rst, geometry_dijkstra_rst, movement_speed):
         result = Result(

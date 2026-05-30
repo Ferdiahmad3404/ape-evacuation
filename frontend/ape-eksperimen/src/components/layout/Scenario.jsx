@@ -1,37 +1,43 @@
 import { Button, Flex, Paper, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "./Scenario.css";
 
 function Scenario() {
   const navigate = useNavigate();
-
   const { scenario_id } = useParams();
 
-  const departurePoint = [
-    {
-      id: 1,
-      name: "Titik Keberangkatan 1",
-      lat: -6.2,
-      lng: 106.816666,
-    },
-    {
-      id: 2,
-      name: "Titik Keberangkatan 2",
-      lat: -6.3,
-      lng: 106.816666,
-    },
-    {
-      id: 3,
-      name: "Titik Keberangkatan 3",
-      lat: -6.4,
-      lng: 106.816666,
-    },
-  ];
+  const [persons, setPersons] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleClick = (point) => {
-    navigate(`/result/${scenario_id}/${point.id}`);
+  useEffect(() => {
+    const fetchScenario = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/scenarios/${scenario_id}`,
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Gagal mengambil data");
+        }
+
+        setPersons(Object.values(data.persons ?? {}));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScenario();
+  }, [scenario_id]);
+
+  const handleClick = (person) => {
+    navigate(`/result/${scenario_id}/${person.person_id}`);
   };
 
   const handleBack = () => {
@@ -56,30 +62,38 @@ function Scenario() {
             Kembali
           </Button>
 
-          <Text fw={700}>Scenario {scenario_id}</Text>
+          <Text fw={700}>Daftar Person</Text>
         </Flex>
 
-        {departurePoint.map((point) => (
-          <Flex
-            key={point.id}
-            className="border-bottom departure-item"
-            direction="column"
-            align="stretch"
-            w="100%"
-            p="xs"
-            gap="sm"
-            onClick={() => handleClick(point)}
-            style={{ cursor: "pointer" }}
-          >
-            <h2>{point.name}</h2>
+        {loading ? (
+          <Text p="md">Loading...</Text>
+        ) : (
+          persons.map((person, index) => (
+            <Flex
+              key={person.person_id}
+              className="border-bottom departure-item"
+              direction="column"
+              align="stretch"
+              w="100%"
+              p="xs"
+              gap="sm"
+              onClick={() => handleClick(person)}
+              style={{ cursor: "pointer" }}
+            >
+              <h2>Person {index + 1}</h2>
 
-            <Flex direction="row" gap="xs">
-              <Text size="sm">Latitude: {point.lat}</Text>
+              <Flex direction="row" gap="xs">
+                <Text size="sm">
+                  Latitude: {Number(person.latitude).toFixed(6)}
+                </Text>
 
-              <Text size="sm">Longitude: {point.lng}</Text>
+                <Text size="sm">
+                  Longitude: {Number(person.longitude).toFixed(6)}
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
-        ))}
+          ))
+        )}
       </Flex>
     </Paper>
   );

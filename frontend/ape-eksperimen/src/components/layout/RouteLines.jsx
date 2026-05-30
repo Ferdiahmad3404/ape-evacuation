@@ -7,16 +7,18 @@ function RouteLines({ routes }) {
 
   return (
     <>
-      {routes.map((route, index) => (
-        <Polyline
-          key={index}
-          positions={route.geometry}
-          pathOptions={{
-            color: route.color,
-            weight: 5,
-          }}
-        />
-      ))}
+      {routes.map((route, routeIndex) =>
+        route.geometry?.map((segment, segmentIndex) => (
+          <Polyline
+            key={`${routeIndex}-${segmentIndex}`}
+            positions={segment}
+            pathOptions={{
+              color: route.color,
+              weight: 5,
+            }}
+          />
+        )),
+      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { Button, Flex, Paper, Text } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Simulation.css";
 
 const createRowId = () =>
@@ -95,6 +96,7 @@ function Simulation({
   const [departurePoints, setDeparturePoints] = useState([
     createDeparturePoint(1),
   ]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!mapSelection) {
@@ -141,6 +143,8 @@ function Simulation({
 
       console.log("Simulation result:", data);
       alert("Simulation berhasil");
+
+      navigate(`/result/${data.scenario_id}`);
     } catch (error) {
       console.error(error);
       alert("Terjadi kesalahan koneksi");
