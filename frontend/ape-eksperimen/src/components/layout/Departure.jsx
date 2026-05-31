@@ -2,15 +2,14 @@ import { Button, Flex, Paper, Select, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
 import "./Departure.css";
 
 function Departure({ onShowRoutes, onMapFocus }) {
   const navigate = useNavigate();
-
   const { scenario_id, departure_point_id } = useParams();
 
   const [loading, setLoading] = useState(true);
+  const [rawData, setRawData] = useState([]);
   const [evacuationPoints, setEvacuationPoints] = useState([]);
 
   const [selectedRow, setSelectedRow] = useState(null);
@@ -29,6 +28,10 @@ function Departure({ onShowRoutes, onMapFocus }) {
   const [selectedSpeedWalk, setSelectedSpeedWalk] = useState(
     speedWalk[1].value.toString(),
   );
+
+  const filterBySpeed = (data, speed) => {
+    return data.filter((item) => item.movement_speed == Number(speed));
+  };
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -52,21 +55,16 @@ function Departure({ onShowRoutes, onMapFocus }) {
           return {
             id: item.id,
             name: `Titik Evakuasi ${index + 1}`,
-
+            movement_speed: item.movement_speed,
             ETE_dijkstra: item.ete_dijkstra,
             ETE_dijkstra_rst: item.ete_dijkstra_rst,
-
-            geometry: dijkstraGeometry.safe.map((segment) =>
-              segment.map(([lng, lat]) => [lat, lng]),
-            ),
-
-            geometry_rst: rstGeometry.safe.map((segment) =>
-              segment.map(([lng, lat]) => [lat, lng]),
-            ),
+            geometry: dijkstraGeometry,
+            geometry_rst: rstGeometry,
           };
         });
 
-        setEvacuationPoints(mappedData);
+        setRawData(mappedData);
+        setEvacuationPoints(filterBySpeed(mappedData, selectedSpeedWalk));
       } catch (error) {
         console.error(error);
       } finally {
@@ -76,6 +74,10 @@ function Departure({ onShowRoutes, onMapFocus }) {
 
     fetchResult();
   }, [scenario_id, departure_point_id]);
+
+  useEffect(() => {
+    setEvacuationPoints(filterBySpeed(rawData, selectedSpeedWalk));
+  }, [selectedSpeedWalk, rawData]);
 
   const handleBack = () => {
     navigate(-1);
@@ -101,7 +103,7 @@ function Departure({ onShowRoutes, onMapFocus }) {
     ]);
 
     if (point.geometry?.length > 0) {
-      onMapFocus(point.geometry[0][0]);
+      onMapFocus(point.geometry[0]);
     }
   };
 
@@ -124,7 +126,7 @@ function Departure({ onShowRoutes, onMapFocus }) {
       ]);
 
       if (point.geometry?.length > 0) {
-        onMapFocus(point.geometry[0][0]);
+        onMapFocus(point.geometry[0]);
       }
     }
 
@@ -137,7 +139,7 @@ function Departure({ onShowRoutes, onMapFocus }) {
       ]);
 
       if (point.geometry_rst?.length > 0) {
-        onMapFocus(point.geometry_rst[0][0]);
+        onMapFocus(point.geometry_rst[0]);
       }
     }
   };

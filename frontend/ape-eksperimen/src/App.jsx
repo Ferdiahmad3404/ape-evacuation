@@ -7,6 +7,7 @@ import {
   useMapEvents,
   Marker,
   Popup,
+  Polyline,
 } from "react-leaflet";
 
 import L from "leaflet";
@@ -52,10 +53,23 @@ function App() {
   const [mapSelection, setMapSelection] = useState(null);
   const [mapPickTargetId, setMapPickTargetId] = useState(null);
   const [routesToShow, setRoutesToShow] = useState([]);
-  const [mapCenter, setMapCenter] = useState([-6.2, 106.816666]);
+  const [mapCenter, setMapCenter] = useState([
+    -0.9469268755204087, 100.35203933715822,
+  ]);
   const [mapZoom, setMapZoom] = useState(13);
+  const [boundaryPoints] = useState([
+    "/boundary_points-SZ_r2015_m020_097_12_mw9.00_12h_ETA.csv",
+    "/boundary_points-SZ_r2015_m020_097_10_mw9.00_12h_ETA.csv",
+    "/boundary_points-SZ_r2015_m020_095_12_mw9.00_12h_ETA.csv",
+    "/boundary_points-SZ_r2015_m020_095_10_mw9.00_12h_ETA.csv",
+  ]);
+
+  const [selectedBoundaryFile, setSelectedBoundaryFile] = useState(
+    "/boundary_points-SZ_r2015_m020_097_12_mw9.00_12h_ETA.csv",
+  );
 
   const [evacuationPoints, setEvacuationPoints] = useState([]);
+  const [csvRoute, setCsvRoute] = useState([]);
 
   useEffect(() => {
     const fetchEvacuationPoints = async () => {
@@ -65,7 +79,6 @@ function App() {
         );
 
         const data = await response.json();
-
         setEvacuationPoints(Object.values(data));
       } catch (error) {
         console.error("Failed to fetch evacuation points:", error);
@@ -74,6 +87,40 @@ function App() {
 
     fetchEvacuationPoints();
   }, []);
+
+  useEffect(() => {
+    const loadCSV = async (filePath) => {
+      try {
+        const response = await fetch(filePath);
+
+        console.log("CSV status:", response.status);
+
+        const text = await response.text();
+
+        const lines = text.split("\n");
+        const headers = lines[0].split(",");
+
+        const lngIndex = headers.indexOf("longitude");
+        const latIndex = headers.indexOf("latitude");
+
+        const coords = lines
+          .slice(1)
+          .filter((line) => line.trim() !== "")
+          .map((line) => {
+            const cols = line.split(",");
+
+            return [parseFloat(cols[latIndex]), parseFloat(cols[lngIndex])];
+          })
+          .filter((c) => !isNaN(c[0]) && !isNaN(c[1]));
+
+        setCsvRoute(coords);
+      } catch (error) {
+        console.error("CSV load error:", error);
+      }
+    };
+
+    loadCSV(selectedBoundaryFile);
+  }, [selectedBoundaryFile]);
 
   const handleMapSelect = (data) => {
     setMapSelection(data);
@@ -86,6 +133,28 @@ function App() {
         <Sidebar />
 
         <section className="map-panel">
+          <div
+            style={{
+              padding: "10px",
+              background: "#fff",
+              zIndex: 1000,
+            }}
+          >
+            <label>
+              Boundary File:{" "}
+              <select
+                value={selectedBoundaryFile}
+                onChange={(e) => setSelectedBoundaryFile(e.target.value)}
+              >
+                {boundaryPoints.map((file) => (
+                  <option key={file} value={file}>
+                    {file.replace("/", "")}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -104,6 +173,16 @@ function App() {
             <MapFlyTo center={mapCenter} zoom={mapZoom} />
 
             <RouteLines routes={routesToShow} />
+
+            {csvRoute.length > 0 && (
+              <Polyline
+                positions={csvRoute}
+                pathOptions={{
+                  color: "red",
+                  weight: 3,
+                }}
+              />
+            )}
 
             {evacuationPoints.map((point) => (
               <Marker
@@ -137,9 +216,7 @@ function App() {
           />
 
           <Route path="/dataset" element={<Dataset />} />
-
           <Route path="/result" element={<Result />} />
-
           <Route path="/result/:scenario_id" element={<Scenario />} />
 
           <Route

@@ -141,56 +141,14 @@ def find_nearest_node(nodes, latitude, longitude):
 
     return nearest_node
 
-def get_geometry_by_node_id(edges, node_ids):
+def get_geometry_by_node_id(nodes, node_ids):
     geometries = []
 
-    for i, node_id in enumerate(node_ids[:-1]):
-        next_node = node_ids[i + 1]
-
-        for edge in edges.values():
-
-            if edge['u'] == node_id and edge['v'] == next_node:
-                geometry = json.loads(edge['geometry'])
+    for node_id in node_ids:
+        for node in nodes.values():
+            if node['node_id'] == node_id:
+                geometry = [node['latitude'], node['longitude']]
                 geometries.append(geometry)
                 break
 
     return geometries
-
-def geometry_distance(geometry):
-    total_distance = 0
-
-    for i in range(len(geometry) - 1):
-        total_distance += haversine_distance(
-            float(geometry[i][0]),
-            float(geometry[i][1]),
-            float(geometry[i + 1][0]),
-            float(geometry[i + 1][1])
-        )
-
-    return total_distance
-
-def split_geometry_into_safe_and_unsafe(
-    geometries,
-    walking_speed,
-    safe_time_threshold
-):
-    result = {
-        "safe": [],
-        "unsafe": []
-    }
-
-    cumulative_distance = 0
-
-    for geometry in geometries:
-        segment_distance = geometry_distance(geometry)
-        
-        cumulative_distance += segment_distance
-
-        travel_time = (cumulative_distance / walking_speed) / 60
-
-        if travel_time < safe_time_threshold:
-            result["safe"].append(geometry)
-        else:
-            result["unsafe"].append(geometry)
-
-    return result

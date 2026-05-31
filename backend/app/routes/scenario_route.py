@@ -8,6 +8,14 @@ import pandas as pd
 
 scenario_bp = Blueprint("scenario", __name__)
 
+@scenario_bp.get("/scenarios")
+def get_scenarios():
+    scenarios = PersonService.get_unique_scenarios()
+
+    return jsonify({
+        "scenarios": scenarios
+    }), 200
+
 @scenario_bp.get("/scenarios/<scenario_id>")
 def get_scenarios_by_id(scenario_id):
     scenarios = PersonService.get_all_persons_by_scenario(scenario_id)
