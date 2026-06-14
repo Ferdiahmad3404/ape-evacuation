@@ -78,3 +78,11 @@ class NodeService:
         db.session.commit()
 
         return nodes
+    
+    @staticmethod
+    def get_lowest_eta_node():
+        lowest_eta_node = Node.query.filter(Node.eta != None).order_by(Node.eta.asc()).first()
+        if lowest_eta_node:
+            return lowest_eta_node.to_dict()
+        else:
+            return None

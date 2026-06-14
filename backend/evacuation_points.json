@@ -17,18 +17,10 @@
   },
   "EP3": {
     "eta": null,
-    "latitude": -0.91207766,
-    "longitude": 100.3565408,
-    "name": "PT SUKAFAJAR",
-    "node_id": "EP3",
-    "status": "evacuation_point"
-  },
-  "EP4": {
-    "eta": null,
-    "latitude": -0.909988142,
-    "longitude": 100.3550122,
+    "latitude": -0.910051398,
+    "longitude": 100.3549163,
     "name": "SEKOLAH AL AZHAR 32 PADANG",
-    "node_id": "EP4",
+    "node_id": "EP3",
     "status": "evacuation_point"
   }
 }

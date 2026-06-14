@@ -29,7 +29,13 @@ def create_simulation():
 
     edges_data = EdgeService.get_all_edges()
 
+    lowest_eta_node = NodeService.get_lowest_eta_node()['eta']
+
     evacuation_points_data = NodeService.get_all_node_evacuation_points()
+
+    t_warning = 5
+
+    t_reaction = 15
 
     scenario_name = next(iter(graph_data.values()))["scenario_name"]
     scenario, count = ScenarioService.create_scenario(prefix_name=scenario_name)
@@ -70,8 +76,8 @@ def create_simulation():
                     graph_data,
                     start_node_id,
                     evac_point_id,
-                    5,
-                    7,
+                    t_warning,
+                    t_reaction,
                     walking_speed,
                 )
 
@@ -89,6 +95,7 @@ def create_simulation():
                     json.dumps(node_information_dijkstra),
                     json.dumps(edge_information_dijkstra),
                     json.dumps(geometries_dijkstra),
+                    lowest_eta_node - t_warning - t_reaction,
                     round(float(dist_dijkstra_rst[evac_point_id]), 2),
                     json.dumps(node_information_dijkstra_rst),
                     json.dumps(edge_information_dijkstra_rst),

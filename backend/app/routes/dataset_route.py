@@ -17,9 +17,7 @@ def create_dataset():
     nodes_file = request.files.get("nodes_file")
     edges_file = request.files.get("edges_file")
 
-    filename = "nodes-SZ_r2015_m020_097_12_mw9.00_12h_ETA.csv"
-
-    scenario_name = re.search(r'nodes-(.*)\.csv$', filename).group(1)
+    scenario_name = re.search(r'nodes-(.*)\.csv$', nodes_file.filename).group(1)
 
     if not nodes_file or not edges_file:
         return jsonify({

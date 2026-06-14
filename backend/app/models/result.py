@@ -11,6 +11,7 @@ class Result(db.Model):
     ete_dijkstra = db.Column(db.Float, nullable=True)
     node_information_dijkstra = db.Column(db.Text, nullable=True)
     edge_information_dijkstra = db.Column(db.Text, nullable=True)
+    rst_dijkstra = db.Column(db.Float, nullable=True)
     geometry_dijkstra = db.Column(db.String, nullable=True)
     ete_dijkstra_rst = db.Column(db.Float, nullable=True)
     node_information_dijkstra_rst = db.Column(db.Text, nullable=True)
@@ -27,6 +28,7 @@ class Result(db.Model):
             "node_information_dijkstra": self.node_information_dijkstra,
             "edge_information_dijkstra": self.edge_information_dijkstra,
             "geometry_dijkstra": self.geometry_dijkstra,
+            "rst_dijkstra": self.rst_dijkstra,
             "ete_dijkstra_rst": self.ete_dijkstra_rst,
             "node_information_dijkstra_rst": self.node_information_dijkstra_rst,
             "edge_information_dijkstra_rst": self.edge_information_dijkstra_rst,
