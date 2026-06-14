@@ -1,4 +1,4 @@
-import { Flex, Paper, Text } from "@mantine/core";
+import { Flex, Paper, Text, Button } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -14,7 +14,6 @@ function Result() {
     const fetchScenarios = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/scenarios");
-
         const data = await response.json();
 
         if (!response.ok) {
@@ -36,6 +35,35 @@ function Result() {
     navigate(`/result/${scenarioId}`);
   };
 
+  const handleDelete = async (e, scenarioId) => {
+    e.stopPropagation();
+
+    // ✅ CONFIRMATION ALERT
+    const confirmDelete = window.confirm(
+      "Apakah kamu yakin ingin menghapus scenario ini?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/scenarios/${scenarioId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Gagal menghapus scenario");
+      }
+
+      setScenarios((prev) => prev.filter((item) => item.id !== scenarioId));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (loading) {
     return (
       <Paper className="result border" shadow="md" radius="lg" withBorder>
@@ -48,29 +76,34 @@ function Result() {
 
   return (
     <Paper className="result border" shadow="md" radius="lg" withBorder>
-      <Flex direction="column">
-        {scenarios.length === 0 ? (
-          <Flex p="md">
-            <Text>Tidak ada scenario.</Text>
-          </Flex>
-        ) : (
-          scenarios.map((scenarioId, index) => (
-            <Flex
-              key={scenarioId}
-              className="border-bottom result-item"
-              direction="column"
-              align="stretch"
-              w="100%"
-              p="xs"
-              gap="sm"
-              onClick={() => handleClick(scenarioId)}
-              style={{ cursor: "pointer" }}
+      {scenarios.length === 0 ? (
+        <Flex p="md">
+          <Text>Tidak ada scenario.</Text>
+        </Flex>
+      ) : (
+        scenarios.map((scenario) => (
+          <Flex
+            key={scenario.id}
+            className="border-bottom result-item"
+            justify="space-between"
+            align="center"
+            p="xs"
+            onClick={() => handleClick(scenario.id)}
+          >
+            <Text fw={600} className="scenario-text">
+              {scenario.name}
+            </Text>
+
+            <Button
+              color="red"
+              size="xs"
+              onClick={(e) => handleDelete(e, scenario.id)}
             >
-              <h2>Scenario {index + 1}</h2>
-            </Flex>
-          ))
-        )}
-      </Flex>
+              Delete
+            </Button>
+          </Flex>
+        ))
+      )}
     </Paper>
   );
 }

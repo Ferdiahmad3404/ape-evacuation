@@ -1,0 +1,226 @@
+[
+  {
+    "eta": 39.26,
+    "latitude": -0.907061,
+    "longitude": 100.3475861,
+    "name": null,
+    "node_id": "1438192597",
+    "status": "intersection"
+  },
+  {
+    "eta": 39.43,
+    "latitude": -0.9065502,
+    "longitude": 100.3476564,
+    "name": null,
+    "node_id": "12350275498",
+    "status": "intersection"
+  },
+  {
+    "eta": 39.48,
+    "latitude": -0.9065579,
+    "longitude": 100.3477167,
+    "name": null,
+    "node_id": "1359203660",
+    "status": "intersection"
+  },
+  {
+    "eta": 39.43,
+    "latitude": -0.9060884,
+    "longitude": 100.3480487,
+    "name": null,
+    "node_id": "1438831867",
+    "status": "intersection"
+  },
+  {
+    "eta": 39.37,
+    "latitude": -0.9057692,
+    "longitude": 100.3482553,
+    "name": null,
+    "node_id": "1359203640",
+    "status": "intersection"
+  },
+  {
+    "eta": 40.1,
+    "latitude": -0.9063867,
+    "longitude": 100.3492453,
+    "name": null,
+    "node_id": "1359203642",
+    "status": "intersection"
+  },
+  {
+    "eta": 40.36,
+    "latitude": -0.9063837,
+    "longitude": 100.3496745,
+    "name": null,
+    "node_id": "1449094475",
+    "status": "intersection"
+  },
+  {
+    "eta": 40.59,
+    "latitude": -0.9063821,
+    "longitude": 100.3501094,
+    "name": null,
+    "node_id": "1449094477",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.26,
+    "latitude": -0.9063519,
+    "longitude": 100.3510761,
+    "name": null,
+    "node_id": "1449094473",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.45,
+    "latitude": -0.9059755,
+    "longitude": 100.3510446,
+    "name": null,
+    "node_id": "6082329023",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.41,
+    "latitude": -0.9059616,
+    "longitude": 100.3511662,
+    "name": null,
+    "node_id": "7723140637",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.45,
+    "latitude": -0.9059401,
+    "longitude": 100.3511846,
+    "name": null,
+    "node_id": "6082329021",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.29,
+    "latitude": -0.9058122,
+    "longitude": 100.3511749,
+    "name": null,
+    "node_id": "6082329029",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.78,
+    "latitude": -0.9058739,
+    "longitude": 100.3515832,
+    "name": null,
+    "node_id": "1736577188",
+    "status": "intersection"
+  },
+  {
+    "eta": 41.78,
+    "latitude": -0.9059224,
+    "longitude": 100.3517026,
+    "name": null,
+    "node_id": "1736577198",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.01,
+    "latitude": -0.9059856,
+    "longitude": 100.3518234,
+    "name": null,
+    "node_id": "6082726547",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.23,
+    "latitude": -0.9066118,
+    "longitude": 100.3523424,
+    "name": null,
+    "node_id": "6082886775",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.34,
+    "latitude": -0.9067124,
+    "longitude": 100.3524363,
+    "name": null,
+    "node_id": "6082886771",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.63,
+    "latitude": -0.9070088,
+    "longitude": 100.3526924,
+    "name": null,
+    "node_id": "6082886764",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.7,
+    "latitude": -0.9071168,
+    "longitude": 100.3527786,
+    "name": null,
+    "node_id": "6082886760",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.84,
+    "latitude": -0.9073165,
+    "longitude": 100.3529379,
+    "name": null,
+    "node_id": "1736577428",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.94,
+    "latitude": -0.9073721,
+    "longitude": 100.3529822,
+    "name": null,
+    "node_id": "6082886758",
+    "status": "intersection"
+  },
+  {
+    "eta": 43.37,
+    "latitude": -0.9076033,
+    "longitude": 100.3531475,
+    "name": null,
+    "node_id": "6106845997",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.98,
+    "latitude": -0.9079791,
+    "longitude": 100.3534635,
+    "name": null,
+    "node_id": "1736577435",
+    "status": "intersection"
+  },
+  {
+    "eta": 42.95,
+    "latitude": -0.908089,
+    "longitude": 100.3535565,
+    "name": null,
+    "node_id": "7723196768",
+    "status": "intersection"
+  },
+  {
+    "eta": 44.47,
+    "latitude": -0.9092645,
+    "longitude": 100.3544539,
+    "name": null,
+    "node_id": "6083145816",
+    "status": "intersection"
+  },
+  {
+    "eta": null,
+    "latitude": -0.9095549,
+    "longitude": 100.3546831,
+    "name": null,
+    "node_id": "6083145811",
+    "status": "intersection"
+  },
+  {
+    "eta": null,
+    "latitude": -0.909988142,
+    "longitude": 100.3550122,
+    "name": "place 6",
+    "node_id": "EP6",
+    "status": "evacuation_point"
+  }
+]

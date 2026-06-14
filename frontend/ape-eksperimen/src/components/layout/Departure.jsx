@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Departure.css";
 
-function Departure({ onShowRoutes, onMapFocus }) {
+function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
   const navigate = useNavigate();
   const { scenario_id, departure_point_id } = useParams();
 
@@ -20,9 +20,9 @@ function Departure({ onShowRoutes, onMapFocus }) {
   });
 
   const speedWalk = [
-    { id: 1, name: "Lambat", value: 0.8 },
-    { id: 2, name: "Sedang", value: 1.2 },
-    { id: 3, name: "Cepat", value: 1.6 },
+    { id: 1, name: "", value: 1.35 },
+    { id: 2, name: "", value: 1.5 },
+    { id: 3, name: "", value: 1.4 },
   ];
 
   const [selectedSpeedWalk, setSelectedSpeedWalk] = useState(
@@ -50,16 +50,28 @@ function Departure({ onShowRoutes, onMapFocus }) {
 
         const mappedData = (data.result || []).map((item, index) => {
           const dijkstraGeometry = JSON.parse(item.geometry_dijkstra);
-          const rstGeometry = JSON.parse(item.geometry_dijkstra_rst);
+          const dijkstraRstGeometry = JSON.parse(item.geometry_dijkstra_rst);
 
           return {
             id: item.id,
-            name: `Titik Evakuasi ${index + 1}`,
+            name: item.evacuation_point_name,
             movement_speed: item.movement_speed,
-            ETE_dijkstra: item.ete_dijkstra,
-            ETE_dijkstra_rst: item.ete_dijkstra_rst,
-            geometry: dijkstraGeometry,
-            geometry_rst: rstGeometry,
+            ete_dijkstra: item.ete_dijkstra,
+            ete_dijkstra_rst: item.ete_dijkstra_rst,
+            node_information_dijkstra: JSON.parse(
+              item.node_information_dijkstra,
+            ),
+            edge_information_dijkstra: JSON.parse(
+              item.edge_information_dijkstra,
+            ),
+            geometry_dijkstra: dijkstraGeometry,
+            geometry_dijkstra_rst: dijkstraRstGeometry,
+            node_information_dijkstra_rst: JSON.parse(
+              item.node_information_dijkstra_rst,
+            ),
+            edge_information_dijkstra_rst: JSON.parse(
+              item.edge_information_dijkstra_rst,
+            ),
           };
         });
 
@@ -91,19 +103,21 @@ function Departure({ onShowRoutes, onMapFocus }) {
       type: null,
     });
 
+    onSetNodes(point.node_information_dijkstra);
+
     onShowRoutes([
       {
-        geometry: point.geometry,
+        geometry: point.geometry_dijkstra,
         color: "blue",
       },
       {
-        geometry: point.geometry_rst,
+        geometry: point.geometry_dijkstra_rst,
         color: "orange",
       },
     ]);
 
-    if (point.geometry?.length > 0) {
-      onMapFocus(point.geometry[0]);
+    if (point.geometry_dijkstra?.length > 0) {
+      onMapFocus(point.geometry_dijkstra[0]);
     }
   };
 
@@ -118,28 +132,34 @@ function Departure({ onShowRoutes, onMapFocus }) {
     });
 
     if (type === "dijkstra") {
+      onSetNodes(point.node_information_dijkstra);
+      onSetEdges(point.edge_information_dijkstra);
+
       onShowRoutes([
         {
-          geometry: point.geometry,
+          geometry: point.geometry_dijkstra,
           color: "blue",
         },
       ]);
 
-      if (point.geometry?.length > 0) {
-        onMapFocus(point.geometry[0]);
+      if (point.geometry_dijkstra?.length > 0) {
+        onMapFocus(point.geometry_dijkstra[0]);
       }
     }
 
     if (type === "dijkstra_rst") {
+      onSetNodes(point.node_information_dijkstra_rst);
+      onSetEdges(point.edge_information_dijkstra_rst);
+
       onShowRoutes([
         {
-          geometry: point.geometry_rst,
+          geometry: point.geometry_dijkstra_rst,
           color: "orange",
         },
       ]);
 
-      if (point.geometry_rst?.length > 0) {
-        onMapFocus(point.geometry_rst[0]);
+      if (point.geometry_dijkstra_rst?.length > 0) {
+        onMapFocus(point.geometry_dijkstra_rst[0]);
       }
     }
   };
@@ -251,7 +271,7 @@ function Departure({ onShowRoutes, onMapFocus }) {
                 onClick={(event) => handleCellClick(point, "dijkstra", event)}
               >
                 <Text size="sm">
-                  ETE: {Number(point.ETE_dijkstra).toFixed(2)} menit
+                  ETE: {Number(point.ete_dijkstra).toFixed(2)} menit
                 </Text>
               </Flex>
 
@@ -267,7 +287,7 @@ function Departure({ onShowRoutes, onMapFocus }) {
                 }
               >
                 <Text size="sm">
-                  ETE: {Number(point.ETE_dijkstra_rst).toFixed(2)} menit
+                  ETE: {Number(point.ete_dijkstra_rst).toFixed(2)} menit
                 </Text>
               </Flex>
             </Flex>

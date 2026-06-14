@@ -46,7 +46,7 @@ class EdgeService:
             edge = Edge(
                 u=item["u"],
                 v=item["v"],
-                length=item["length"],
+                length=round(float(item["length"]), 2),
                 geometry=item.get("geometry"),
             )
 

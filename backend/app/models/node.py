@@ -12,6 +12,7 @@ class Node(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)
     eta = db.Column(db.Float, nullable=True)
+    name = db.Column(db.String(100), nullable=True)
 
     def to_dict(self):
         return {
@@ -21,4 +22,5 @@ class Node(db.Model):
             "longitude": self.longitude,
             "status": self.status,
             "eta": self.eta,
+            "name": self.name
         }

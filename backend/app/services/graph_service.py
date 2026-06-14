@@ -13,13 +13,14 @@ class GraphService:
                 "neighbors": json.loads(
                     graph.neighbors.replace("NaN", "null")
                 ),
-                "node": graph.node
+                "node": graph.node,
+                "scenario_name": graph.scenario_name
             }
             for graph in graphs
     }
 
     @staticmethod
-    def bulk_replace_graph(graph_data):
+    def bulk_replace_graph(graph_data, scenario_name):
         graph = []
 
         Graph.query.delete()
@@ -28,6 +29,7 @@ class GraphService:
             graph_item = Graph(
                 node=item["node"],
                 neighbors=item["neighbors"],
+                scenario_name=scenario_name
             )
             graph.append(graph_item)
 

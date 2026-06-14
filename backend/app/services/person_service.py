@@ -13,8 +13,8 @@ class PersonService:
         persons = Person.query.filter_by(scenario_id=scenario_id).all()
 
         return {
-            person.person_id: {
-                "person_id": person.person_id,
+            person.id: {
+                "person_id": person.id,
                 "scenario_id": person.scenario_id,
                 "latitude": person.latitude,
                 "longitude": person.longitude
@@ -23,14 +23,8 @@ class PersonService:
         }
 
     @staticmethod
-    def create_person(person_id, scenario_id, latitude, longitude):
-        existing_person = Person.query.filter_by(person_id=person_id).first()
-
-        if existing_person:
-            raise ValueError("Person ID sudah digunakan")
-
+    def create_person(scenario_id, latitude, longitude):
         person = Person(
-            person_id=person_id,
             scenario_id=scenario_id,
             latitude=latitude,
             longitude=longitude
@@ -40,3 +34,14 @@ class PersonService:
         db.session.commit()
 
         return person
+    
+    @staticmethod
+    def delete_persons_by_scenario(scenario_id):
+        persons = Person.query.filter_by(scenario_id=scenario_id).all()
+
+        for person in persons:
+            db.session.delete(person)
+
+        db.session.commit()
+
+        return persons

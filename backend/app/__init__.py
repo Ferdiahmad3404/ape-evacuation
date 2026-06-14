@@ -28,6 +28,7 @@ def create_app():
         from .models import node
         from .models import person
         from .models import result
+        from .models import scenario
 
         db.create_all()
 

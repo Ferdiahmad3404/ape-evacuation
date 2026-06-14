@@ -16,6 +16,7 @@ class NodeService:
                 "latitude": node.latitude,
                 "longitude": node.longitude,
                 "node_id": node.node_id,
+                "name": node.name,
                 "status": node.status
             }
             for node in nodes
@@ -35,7 +36,8 @@ class NodeService:
                 "latitude": node.latitude,
                 "longitude": node.longitude,
                 "node_id": node.node_id,
-                "status": node.status
+                "status": node.status,
+                "name": node.name
             }
             for node in nodes
         }
@@ -52,10 +54,14 @@ class NodeService:
             if eta_value in (None, "", "Infinity", "inf", float("inf")):
                 eta_value = None
             else:
-                eta_value = float(eta_value)
+                eta_value = round(float(eta_value), 2)
 
             if eta_value is not None and not math.isfinite(eta_value):
                 eta_value = None
+
+            name_value = item.get("name")
+            if name_value in (None, "", "nan", "NaN") or (isinstance(name_value, float) and math.isnan(name_value)):
+                name_value = None
 
             node = Node(
                 node_id=item["node_id"],
@@ -63,6 +69,7 @@ class NodeService:
                 longitude=float(item["longitude"]),
                 status=item["status"],
                 eta=eta_value,
+                name=name_value,
             )
 
             nodes.append(node)

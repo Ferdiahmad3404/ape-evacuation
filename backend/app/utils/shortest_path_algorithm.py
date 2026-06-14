@@ -34,7 +34,7 @@ def dijkstra(graph, source, target, walking_speed):
             if visited[v]:
                 continue
             
-            alt = dist[u] + ((edge['length'] / walking_speed) / 60)
+            alt = dist[u] + round(float((edge['length'] / walking_speed) / 60), 2)
 
             if alt < dist[v]:
                 dist[v] = alt
@@ -91,7 +91,7 @@ def dijkstra_with_rst(
             else:
                 rst = float("inf")
 
-            alt = dist[u] + ((edge['length'] / walking_speed) / 60)
+            alt = dist[u] + round(float((edge['length'] / walking_speed) / 60), 2)
 
             if not alt < rst:
                 continue
@@ -152,3 +152,46 @@ def get_geometry_by_node_id(nodes, node_ids):
                 break
 
     return geometries
+
+def get_node_information_by_node_id(nodes, node_ids):
+    node_information = []
+
+    for node_id in node_ids:
+        for node in nodes.values():
+            if node['node_id'] == node_id:
+                node_info = {
+                    "node_id": node['node_id'],
+                    "latitude": node['latitude'],
+                    "longitude": node['longitude'],
+                    "status": node['status'],
+                    "eta": node.get('eta'),
+                    "name": node['name']
+                }
+                node_information.append(node_info)
+                break
+
+    return node_information
+
+def get_edge_information_by_node_id(edges, node_ids):
+    edge_information = []
+
+    for i in range(len(node_ids) - 1):
+        u = node_ids[i]
+        v = node_ids[i + 1]
+
+        edge_key = f"{u}_{v}"
+        reverse_edge_key = f"{v}_{u}"
+
+        edge_data = (
+            edges.get(edge_key)
+            or edges.get(reverse_edge_key)
+        )
+
+        if edge_data:
+            edge_information.append({
+                "u": edge_data["u"],
+                "v": edge_data["v"],
+                "length": edge_data["length"],
+            })
+
+    return edge_information

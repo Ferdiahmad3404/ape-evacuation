@@ -4,8 +4,9 @@ from ..services.edge_service import EdgeService
 from ..services.graph_service import GraphService
 from ..services.node_service import NodeService
 from ..services.result_service import ResultService
+from ..services.scenario_service import ScenarioService
 from ..services.person_service import PersonService
-from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id
+from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id, get_node_information_by_node_id, get_edge_information_by_node_id
 import uuid
 
 simulation_bp = Blueprint("simulation", __name__)
@@ -20,27 +21,25 @@ def create_simulation():
             "message": "Payload tidak boleh kosong"
         }), 400
     
-    walking_speeds = [0.8, 1.2, 1.6]
+    walking_speeds = [1.35, 1.5, 1.4]
 
     graph_data = GraphService.get_all_graphs()
 
     nodes_data = NodeService.get_all_nodes()
 
-    # edges_data = EdgeService.get_all_edges()
+    edges_data = EdgeService.get_all_edges()
 
     evacuation_points_data = NodeService.get_all_node_evacuation_points()
 
-
-    scenario_id = uuid.uuid4().hex
+    scenario_name = next(iter(graph_data.values()))["scenario_name"]
+    scenario, count = ScenarioService.create_scenario(prefix_name=scenario_name)
+    scenario_id = scenario.id
 
     for departure_point in payload:
-        person_id = uuid.uuid4().hex
-
-        PersonService.create_person(
-            person_id=person_id,
-            scenario_id=scenario_id,
+        person = PersonService.create_person(
             latitude=departure_point["latitude"],
-            longitude=departure_point["longitude"]
+            longitude=departure_point["longitude"],
+            scenario_id=scenario_id
         )
 
         for walking_speed in walking_speeds:
@@ -61,34 +60,41 @@ def create_simulation():
 
                 path_dijkstra = reconstruct_path(prev_dijkstra, start_node_id, evac_point_id)
 
-                geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
+                node_information_dijkstra = get_node_information_by_node_id(nodes_data, path_dijkstra)
 
-                with open("geomet_dijkstra.json", "w") as debug_file:
-                    json.dump(geometries_dijkstra, debug_file)
+                edge_information_dijkstra = get_edge_information_by_node_id(edges_data, path_dijkstra)
+
+                geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
 
                 dist_dijkstra_rst, prev_dijkstra_rst = dijkstra_with_rst(
                     graph_data,
                     start_node_id,
                     evac_point_id,
                     5,
-                    10,
+                    7,
                     walking_speed,
                 )
 
                 path_dijkstra_rst = reconstruct_path(prev_dijkstra_rst, start_node_id, evac_point_id)
 
+                node_information_dijkstra_rst = get_node_information_by_node_id(nodes_data, path_dijkstra_rst)
+
+                edge_information_dijkstra_rst = get_edge_information_by_node_id(edges_data, path_dijkstra_rst)
+
                 geometries_dijkstra_rst = get_geometry_by_node_id(nodes_data, path_dijkstra_rst)
 
-                with open("geomet_dijkstra_rst.json", "w") as debug_file:
-                    json.dump(geometries_dijkstra_rst, debug_file)
-
                 ResultService.save_result(
-                    person_id,
-                    dist_dijkstra[evac_point_id],
+                    person.id,
+                    round(float(dist_dijkstra[evac_point_id]), 2),
+                    json.dumps(node_information_dijkstra),
+                    json.dumps(edge_information_dijkstra),
                     json.dumps(geometries_dijkstra),
-                    dist_dijkstra_rst[evac_point_id],
+                    round(float(dist_dijkstra_rst[evac_point_id]), 2),
+                    json.dumps(node_information_dijkstra_rst),
+                    json.dumps(edge_information_dijkstra_rst),
                     json.dumps(geometries_dijkstra_rst),
-                    movement_speed=walking_speed
+                    evac_point["name"],
+                    walking_speed
                 )
 
     return jsonify({

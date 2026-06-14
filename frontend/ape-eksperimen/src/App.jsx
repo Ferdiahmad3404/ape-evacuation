@@ -8,6 +8,8 @@ import {
   Marker,
   Popup,
   Polyline,
+  CircleMarker,
+  Tooltip,
 } from "react-leaflet";
 
 import L from "leaflet";
@@ -50,6 +52,15 @@ function MapClickHandler({ mapPickTargetId, onMapSelect }) {
 }
 
 function App() {
+  const departureIcon = new L.Icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
   const [mapSelection, setMapSelection] = useState(null);
   const [mapPickTargetId, setMapPickTargetId] = useState(null);
   const [routesToShow, setRoutesToShow] = useState([]);
@@ -70,6 +81,21 @@ function App() {
 
   const [evacuationPoints, setEvacuationPoints] = useState([]);
   const [csvRoute, setCsvRoute] = useState([]);
+
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+
+  const getNodeColor = (node, index) => {
+    if (index === 0) {
+      return "#8eff8a";
+    }
+
+    if (node.status === "evacuation_point") {
+      return "";
+    }
+
+    return "#ff0000";
+  };
 
   useEffect(() => {
     const fetchEvacuationPoints = async () => {
@@ -170,9 +196,63 @@ function App() {
               onMapSelect={handleMapSelect}
             />
 
-            <MapFlyTo center={mapCenter} zoom={mapZoom} />
+            <RouteLines routes={routesToShow} nodes={nodes} edges={edges} />
 
-            <RouteLines routes={routesToShow} />
+            {nodes.map((node, index) => {
+              if (index === 0) {
+                return (
+                  <Marker
+                    key={node.node_id}
+                    position={[node.latitude, node.longitude]}
+                    icon={departureIcon}
+                  >
+                    <Popup>
+                      <div>
+                        <strong>Titik Keberangkatan</strong>
+                        <br />
+                        Node ID: {node.node_id}
+                        <br />
+                        Status: {node.status}
+                        {node.eta !== null && (
+                          <>
+                            <br />
+                            ETA: {node.eta}
+                          </>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              }
+
+              return (
+                <CircleMarker
+                  key={node.node_id}
+                  center={[node.latitude, node.longitude]}
+                  radius={3}
+                  pathOptions={{
+                    color: getNodeColor(node, index),
+                    fillColor: getNodeColor(node, index),
+                    fillOpacity: 1,
+                    weight: 1,
+                  }}
+                >
+                  <Tooltip>
+                    <div>
+                      <strong>{node.node_id}</strong>
+                      <br />
+                      Status: {node.status}
+                      {node.eta !== null && (
+                        <>
+                          <br />
+                          ETA: {node.eta}
+                        </>
+                      )}
+                    </div>
+                  </Tooltip>
+                </CircleMarker>
+              );
+            })}
 
             {csvRoute.length > 0 && (
               <Polyline
@@ -191,7 +271,9 @@ function App() {
               >
                 <Popup>
                   <div>
-                    <strong>{point.node_id}</strong>
+                    <strong>Evacuation Point</strong>
+                    <br />
+                    Evacuation Point: {point.name}
                     <br />
                     Latitude: {point.latitude}
                     <br />
@@ -228,6 +310,8 @@ function App() {
                   setMapCenter(position);
                   setMapZoom(15);
                 }}
+                onSetNodes={setNodes}
+                onSetEdges={setEdges}
               />
             }
           />
