@@ -1,26 +1,26 @@
 {
-  "EP1": {
+  "66": {
     "eta": null,
-    "latitude": -0.927305461,
-    "longitude": 100.3571225,
-    "name": "SDN 26 RIMBO KALUANG",
-    "node_id": "EP1",
+    "latitude": -0.926204588,
+    "longitude": 100.360814,
+    "name": "BAPPEDA PROV SUMBAR",
+    "node_id": "66",
     "status": "evacuation_point"
   },
-  "EP2": {
+  "67": {
     "eta": null,
     "latitude": -0.919245352,
     "longitude": 100.3569959,
     "name": "SMPN 25 PADANG ",
-    "node_id": "EP2",
+    "node_id": "67",
     "status": "evacuation_point"
   },
-  "EP3": {
+  "68": {
     "eta": null,
     "latitude": -0.910051398,
     "longitude": 100.3549163,
     "name": "SEKOLAH AL AZHAR 32 PADANG",
-    "node_id": "EP3",
+    "node_id": "68",
     "status": "evacuation_point"
   }
 }

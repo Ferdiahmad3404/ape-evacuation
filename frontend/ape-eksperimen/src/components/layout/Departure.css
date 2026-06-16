@@ -125,6 +125,10 @@
   flex: 1;
 }
 
+.route-col {
+  flex: 1.45;
+}
+
 /* =========================
    CONTENT
 ========================= */
@@ -162,6 +166,12 @@
 
 .selected-cell {
   background-color: #dbeafe;
+}
+
+.route-text {
+  width: 100%;
+  word-break: break-word;
+  line-height: 1.35;
 }
 
 /* =========================

@@ -21,7 +21,7 @@ def create_simulation():
             "message": "Payload tidak boleh kosong"
         }), 400
     
-    walking_speeds = [1.35, 1.5, 1.4]
+    walking_speeds = [1.35, 1.40, 1.51]
 
     graph_data = GraphService.get_all_graphs()
 
@@ -101,7 +101,9 @@ def create_simulation():
                     json.dumps(edge_information_dijkstra_rst),
                     json.dumps(geometries_dijkstra_rst),
                     evac_point["name"],
-                    walking_speed
+                    walking_speed,
+                    json.dumps(path_dijkstra),
+                    json.dumps(path_dijkstra_rst)
                 )
 
     return jsonify({

@@ -19,6 +19,8 @@ class Result(db.Model):
     geometry_dijkstra_rst = db.Column(db.String, nullable=True)
     evacuation_point_name = db.Column(db.String(50), nullable=False)
     movement_speed = db.Column(db.Float, nullable=True)
+    route_dijkstra = db.Column(db.String, nullable=True)
+    route_dijkstra_rst = db.Column(db.String, nullable=True)
 
     def to_dict(self):
         return {
@@ -35,4 +37,6 @@ class Result(db.Model):
             "geometry_dijkstra_rst": self.geometry_dijkstra_rst,
             "evacuation_point_name": self.evacuation_point_name,
             "movement_speed": self.movement_speed,
+            "route_dijkstra": self.route_dijkstra,
+            "route_dijkstra_rst": self.route_dijkstra_rst,
         }

@@ -1,7 +1,7 @@
 import { Button, Flex, Paper, Select, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Departure.css";
 
 function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
@@ -10,7 +10,6 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
   const [loading, setLoading] = useState(true);
   const [rawData, setRawData] = useState([]);
-  const [evacuationPoints, setEvacuationPoints] = useState([]);
 
   const [selectedRow, setSelectedRow] = useState(null);
 
@@ -21,8 +20,8 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
   const speedWalk = [
     { id: 1, name: "", value: 1.35 },
-    { id: 2, name: "", value: 1.5 },
-    { id: 3, name: "", value: 1.4 },
+    { id: 2, name: "", value: 1.40 },
+    { id: 3, name: "", value: 1.51 },
   ];
 
   const [selectedSpeedWalk, setSelectedSpeedWalk] = useState(
@@ -31,6 +30,34 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
   const filterBySpeed = (data, speed) => {
     return data.filter((item) => item.movement_speed == Number(speed));
+  };
+
+  const evacuationPoints = useMemo(() => {
+    return filterBySpeed(rawData, selectedSpeedWalk);
+  }, [rawData, selectedSpeedWalk]);
+
+  const parseRoute = (route) => {
+    if (Array.isArray(route)) {
+      return route;
+    }
+
+    if (typeof route !== "string" || route.trim() === "") {
+      return [];
+    }
+
+    try {
+      const parsedRoute = JSON.parse(route);
+      return Array.isArray(parsedRoute) ? parsedRoute : [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const formatRoute = (route) => {
+    const parsedRoute = parseRoute(route);
+
+    return parsedRoute.length > 0 ? parsedRoute.join(" → ") : "-";
   };
 
   useEffect(() => {
@@ -48,7 +75,7 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           throw new Error(data.message || "Gagal mengambil data");
         }
 
-        const mappedData = (data.result || []).map((item, index) => {
+        const mappedData = (data.result || []).map((item) => {
           const dijkstraGeometry = JSON.parse(item.geometry_dijkstra);
           const dijkstraRstGeometry = JSON.parse(item.geometry_dijkstra_rst);
 
@@ -72,11 +99,12 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
             edge_information_dijkstra_rst: JSON.parse(
               item.edge_information_dijkstra_rst,
             ),
+            route_dijkstra: parseRoute(item.route_dijkstra),
+            route_dijkstra_rst: parseRoute(item.route_dijkstra_rst),
           };
         });
 
         setRawData(mappedData);
-        setEvacuationPoints(filterBySpeed(mappedData, selectedSpeedWalk));
       } catch (error) {
         console.error(error);
       } finally {
@@ -86,10 +114,6 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
     fetchResult();
   }, [scenario_id, departure_point_id]);
-
-  useEffect(() => {
-    setEvacuationPoints(filterBySpeed(rawData, selectedSpeedWalk));
-  }, [selectedSpeedWalk, rawData]);
 
   const handleBack = () => {
     navigate(-1);
@@ -227,11 +251,27 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           </Flex>
 
           <Flex
+            className="table-col route-col border-left"
+            direction="column"
+            p="sm"
+          >
+            <Text fw={700}>Route Dijkstra</Text>
+          </Flex>
+
+          <Flex
             className="table-col algorithm-col border-left"
             direction="column"
             p="sm"
           >
             <Text fw={700}>Dijkstra + RsT</Text>
+          </Flex>
+
+          <Flex
+            className="table-col route-col border-left"
+            direction="column"
+            p="sm"
+          >
+            <Text fw={700}>Route Dijkstra + RsT</Text>
           </Flex>
         </Flex>
 
@@ -271,7 +311,17 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                 onClick={(event) => handleCellClick(point, "dijkstra", event)}
               >
                 <Text size="sm">
-                  ETE: {Number(point.ete_dijkstra).toFixed(2)} menit
+                  {Number(point.ete_dijkstra).toFixed(2)} menit
+                </Text>
+              </Flex>
+
+              <Flex
+                className="table-col route-col border-left selectable-cell"
+                direction="column"
+                p="sm"
+              >
+                <Text size="sm" className="route-text">
+                  {formatRoute(point.route_dijkstra)}
                 </Text>
               </Flex>
 
@@ -287,7 +337,17 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                 }
               >
                 <Text size="sm">
-                  ETE: {Number(point.ete_dijkstra_rst).toFixed(2)} menit
+                  {Number(point.ete_dijkstra_rst).toFixed(2)} menit
+                </Text>
+              </Flex>
+
+              <Flex
+                className="table-col route-col border-left selectable-cell"
+                direction="column"
+                p="sm"
+              >
+                <Text size="sm" className="route-text">
+                  {formatRoute(point.route_dijkstra_rst)}
                 </Text>
               </Flex>
             </Flex>

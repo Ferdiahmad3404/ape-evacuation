@@ -17,7 +17,7 @@ def create_dataset():
     nodes_file = request.files.get("nodes_file")
     edges_file = request.files.get("edges_file")
 
-    scenario_name = re.search(r'nodes-(.*)\.csv$', nodes_file.filename).group(1)
+    scenario_name = re.search(r'normalize-merged_nodes-(.*)\.csv$', nodes_file.filename).group(1)
 
     if not nodes_file or not edges_file:
         return jsonify({
