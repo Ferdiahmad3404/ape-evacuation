@@ -21,7 +21,6 @@ import Dataset from "./components/layout/Dataset";
 import Result from "./components/layout/Result";
 import Scenario from "./components/layout/Scenario";
 import Departure from "./components/layout/Departure";
-import MapFlyTo from "./components/layout/MapFlyTo";
 import RouteLines from "./components/layout/RouteLines";
 
 import "./App.css";
@@ -64,6 +63,7 @@ function App() {
   const [mapSelection, setMapSelection] = useState(null);
   const [mapPickTargetId, setMapPickTargetId] = useState(null);
   const [routesToShow, setRoutesToShow] = useState([]);
+  const [mapBackground, setMapBackground] = useState("map");
   const [mapCenter, setMapCenter] = useState([
     -0.9469268755204087, 100.35203933715822,
   ]);
@@ -80,21 +80,26 @@ function App() {
   );
 
   const [evacuationPoints, setEvacuationPoints] = useState([]);
+  const [graphNodes, setGraphNodes] = useState([]);
+  const [graphEdges, setGraphEdges] = useState([]);
   const [csvRoute, setCsvRoute] = useState([]);
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
+  const isGraphBackground = mapBackground === "graph" || mapBackground === "both";
+  const showTileBackground = mapBackground === "map" || mapBackground === "both";
+
   const getNodeColor = (node, index) => {
     if (index === 0) {
-      return "#8eff8a";
+      return "#22c55e";
     }
 
     if (node.status === "evacuation_point") {
-      return "";
+      return "#2563eb";
     }
 
-    return "#ff0000";
+    return "#ef4444";
   };
 
   useEffect(() => {
@@ -113,6 +118,44 @@ function App() {
 
     fetchEvacuationPoints();
   }, []);
+
+  useEffect(() => {
+    const fetchGraphNodes = async () => {
+      if (!isGraphBackground) {
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/nodes");
+        const data = await response.json();
+
+        setGraphNodes(Object.values(data));
+      } catch (error) {
+        console.error("Failed to fetch graph nodes:", error);
+      }
+    };
+
+    fetchGraphNodes();
+  }, [isGraphBackground]);
+
+  useEffect(() => {
+    const fetchGraphEdges = async () => {
+      if (!isGraphBackground) {
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/edges");
+        const data = await response.json();
+
+        setGraphEdges(Object.values(data));
+      } catch (error) {
+        console.error("Failed to fetch graph edges:", error);
+      }
+    };
+
+    fetchGraphEdges();
+  }, [isGraphBackground]);
 
   useEffect(() => {
     const loadCSV = async (filePath) => {
@@ -164,10 +207,26 @@ function App() {
               padding: "10px",
               background: "#fff",
               zIndex: 1000,
+              display: "flex",
+              gap: "12px",
+              alignItems: "center",
+              flexWrap: "wrap",
             }}
           >
             <label>
-              Boundary File:{" "}
+              Background Map: {" "}
+              <select
+                value={mapBackground}
+                onChange={(e) => setMapBackground(e.target.value)}
+              >
+                <option value="map">Map</option>
+                <option value="graph">Road Network Graph</option>
+                <option value="both">Both</option>
+              </select>
+            </label>
+
+            <label>
+              Boundary File: {" "}
               <select
                 value={selectedBoundaryFile}
                 onChange={(e) => setSelectedBoundaryFile(e.target.value)}
@@ -186,10 +245,65 @@ function App() {
             zoom={mapZoom}
             className="leaflet-map"
           >
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors"
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            {showTileBackground && (
+              <TileLayer
+                attribution="&copy; OpenStreetMap contributors"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            )}
+
+            {isGraphBackground &&
+              graphEdges.map((edge) => {
+                const uNode = graphNodes.find((node) => node.node_id === edge.u);
+                const vNode = graphNodes.find((node) => node.node_id === edge.v);
+
+                if (!uNode || !vNode) return null;
+
+                return (
+                  <Polyline
+                    key={`graph-edge-${edge.u}-${edge.v}`}
+                    positions={[
+                      [uNode.latitude, uNode.longitude],
+                      [vNode.latitude, vNode.longitude],
+                    ]}
+                    pathOptions={{
+                      color: "#5b6470",
+                      weight: 3,
+                      opacity: 0.85,
+                    }}
+                  />
+                );
+              })}
+
+            {isGraphBackground &&
+              graphNodes.map((node) => (
+                <CircleMarker
+                  key={`graph-node-${node.node_id}`}
+                  center={[node.latitude, node.longitude]}
+                  radius={5}
+                  pathOptions={{
+                    color: node.status === "evacuation_point" ? "#0f766e" : "#7c3aed",
+                    fillColor:
+                      node.status === "evacuation_point" ? "#14b8a6" : "#a78bfa",
+                    fillOpacity: 0.9,
+                    weight: 1,
+                  }}
+                >
+                  <Tooltip>
+                    <div>
+                      <strong>{node.node_id}</strong>
+                      <br />
+                      Status: {node.status}
+                      {node.name ? (
+                        <>
+                          <br />
+                          Name: {node.name}
+                        </>
+                      ) : null}
+                    </div>
+                  </Tooltip>
+                </CircleMarker>
+              ))}
 
             <MapClickHandler
               mapPickTargetId={mapPickTargetId}
@@ -229,7 +343,7 @@ function App() {
                 <CircleMarker
                   key={node.node_id}
                   center={[node.latitude, node.longitude]}
-                  radius={3}
+                  radius={5}
                   pathOptions={{
                     color: getNodeColor(node, index),
                     fillColor: getNodeColor(node, index),
