@@ -19,7 +19,7 @@ class ResultService:
         return data
 
     @staticmethod
-    def save_result(person_id, ete_dijkstra, node_information_dijkstra, edge_information_dijkstra, geometry_dijkstra, rst_dijkstra, ete_dijkstra_rst, node_information_dijkstra_rst, edge_information_dijkstra_rst, geometry_dijkstra_rst, evacuation_point_name, movement_speed, route_dijkstra, route_dijkstra_rst):
+    def save_result(person_id, ete_dijkstra, node_information_dijkstra, edge_information_dijkstra, geometry_dijkstra, rst_dijkstra, ete_dijkstra_rst, node_information_dijkstra_rst, edge_information_dijkstra_rst, rst_dijkstra_rst, geometry_dijkstra_rst, evacuation_point_name, movement_speed, route_dijkstra, route_dijkstra_rst):
         result = Result(
             person_id=person_id,
             ete_dijkstra=ete_dijkstra,
@@ -30,6 +30,7 @@ class ResultService:
             ete_dijkstra_rst=ete_dijkstra_rst,
             node_information_dijkstra_rst=node_information_dijkstra_rst,
             edge_information_dijkstra_rst=edge_information_dijkstra_rst,
+            rst_dijkstra_rst=rst_dijkstra_rst,
             geometry_dijkstra_rst=geometry_dijkstra_rst,
             evacuation_point_name=evacuation_point_name,
             movement_speed=movement_speed,

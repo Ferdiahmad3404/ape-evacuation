@@ -20,7 +20,7 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
   const speedWalk = [
     { id: 1, name: "", value: 1.35 },
-    { id: 2, name: "", value: 1.40 },
+    { id: 2, name: "", value: 1.4 },
     { id: 3, name: "", value: 1.51 },
   ];
 
@@ -60,6 +60,18 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
     return parsedRoute.length > 0 ? parsedRoute.join(" → ") : "-";
   };
 
+  const formatMinutes = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return "-";
+    }
+
+    const numberValue = Number(value);
+
+    return Number.isFinite(numberValue)
+      ? `${numberValue.toFixed(2)} menit`
+      : "-";
+  };
+
   useEffect(() => {
     const fetchResult = async () => {
       try {
@@ -84,7 +96,9 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
             name: item.evacuation_point_name,
             movement_speed: item.movement_speed,
             ete_dijkstra: item.ete_dijkstra,
+            rst_dijkstra: item.rst_dijkstra,
             ete_dijkstra_rst: item.ete_dijkstra_rst,
+            rst_dijkstra_rst: item.rst_dijkstra_rst,
             node_information_dijkstra: JSON.parse(
               item.node_information_dijkstra,
             ),
@@ -248,6 +262,9 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
             p="sm"
           >
             <Text fw={700}>Dijkstra</Text>
+            <Text size="xs" c="dimmed">
+              ETE / RST
+            </Text>
           </Flex>
 
           <Flex
@@ -264,6 +281,9 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
             p="sm"
           >
             <Text fw={700}>Dijkstra + RsT</Text>
+            <Text size="xs" c="dimmed">
+              ETE / RST
+            </Text>
           </Flex>
 
           <Flex
@@ -310,8 +330,9 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                 gap="xs"
                 onClick={(event) => handleCellClick(point, "dijkstra", event)}
               >
-                <Text size="sm">
-                  {Number(point.ete_dijkstra).toFixed(2)} menit
+                <Text size="sm">{formatMinutes(point.ete_dijkstra)}</Text>
+                <Text size="xs" c="dimmed">
+                  RST: {formatMinutes(point.rst_dijkstra)}
                 </Text>
               </Flex>
 
@@ -336,8 +357,9 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                   handleCellClick(point, "dijkstra_rst", event)
                 }
               >
-                <Text size="sm">
-                  {Number(point.ete_dijkstra_rst).toFixed(2)} menit
+                <Text size="sm">{formatMinutes(point.ete_dijkstra_rst)}</Text>
+                <Text size="xs" c="dimmed">
+                  RST: {formatMinutes(point.rst_dijkstra_rst)}
                 </Text>
               </Flex>
 

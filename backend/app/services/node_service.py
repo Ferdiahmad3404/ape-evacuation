@@ -86,3 +86,11 @@ class NodeService:
             return lowest_eta_node.to_dict()
         else:
             return None
+        
+    @staticmethod
+    def get_latest_eta_node_by_path(path):
+        latest_eta_node = Node.query.filter(Node.node_id.in_(path), Node.eta != None).order_by(Node.eta.desc()).first()
+        if latest_eta_node:
+            return latest_eta_node.to_dict()
+        else:
+            return None
