@@ -4,6 +4,7 @@ from ..utils.transformer import transform_to_graph
 from ..services.node_service import NodeService
 from ..services.edge_service import EdgeService
 from ..services.graph_service import GraphService
+from ..services.inundation_service import InundationService
 
 import re
 import pandas as pd
@@ -16,6 +17,7 @@ dataset_bp = Blueprint("dataset", __name__)
 def create_dataset():
     nodes_file = request.files.get("nodes_file")
     edges_file = request.files.get("edges_file")
+    inundation_file = request.files.get("inundation_file")
 
     scenario_name = re.search(r'normalize-merged_nodes-(.*)\.csv$', nodes_file.filename).group(1)
 
@@ -26,11 +28,13 @@ def create_dataset():
 
     nodes_df = pd.read_csv(nodes_file)
     edges_df = pd.read_csv(edges_file)
+    inundation_df = pd.read_csv(inundation_file)
     graph_df = transform_to_graph(nodes_df, edges_df)
 
     NodeService.bulk_replace_nodes(nodes_df.to_dict(orient="records"))
     EdgeService.bulk_replace_edges(edges_df.to_dict(orient="records"))
     GraphService.bulk_replace_graph(graph_df.to_dict(orient="records"), scenario_name)
+    InundationService.bulk_replace_inundation(inundation_df.to_dict(orient="records"))
 
     return jsonify({
         "nodes_rows": len(nodes_df),

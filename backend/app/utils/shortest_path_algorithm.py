@@ -117,7 +117,7 @@ def reconstruct_path(previous_nodes, start_node, end_node):
     return path
 
 def haversine_distance(lat1, lon1, lat2, lon2):
-    R = 6371
+    R = 6371000
     d_lat = math.radians(lat2 - lat1)
     d_lon = math.radians(lon2 - lon1)
     a = math.sin(d_lat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2) ** 2
@@ -195,3 +195,65 @@ def get_edge_information_by_node_id(edges, node_ids):
             })
 
     return edge_information
+
+def project_point_to_segment(ax, ay, bx, by, px, py):
+    abx = bx - ax
+    aby = by - ay
+
+    apx = px - ax
+    apy = py - ay
+
+    ab2 = abx*abx + aby*aby
+
+    if ab2 == 0:
+        return ax, ay, 0
+
+    t = (apx*abx + apy*aby) / ab2
+    t = max(0, min(1, t))
+
+    qx = ax + t * abx
+    qy = ay + t * aby
+
+    return qx, qy, t
+
+
+def latlon_to_xy(lat, lon):
+    R = 6371000
+    x = math.radians(lon) * R * math.cos(math.radians(lat))
+    y = math.radians(lat) * R
+    return x, y
+
+
+def find_nearest_inundation(nodeA, nodeB, inundation_data, radius=50):
+    ax, ay = latlon_to_xy(nodeA["latitude"], nodeA["longitude"])
+    bx, by = latlon_to_xy(nodeB["latitude"], nodeB["longitude"])
+
+    best = None
+    best_t = float("inf")
+
+    for inundation in inundation_data.values():
+
+        px, py = latlon_to_xy(inundation["latitude"], inundation["longitude"])
+
+        qx, qy, t = project_point_to_segment(ax, ay, bx, by, px, py)
+
+        dist = haversine_distance(
+            inundation["latitude"], inundation["longitude"],
+            nodeA["latitude"] + 0, nodeA["longitude"] + 0
+        )
+
+        dx = px - qx
+        dy = py - qy
+        distance = math.sqrt(dx*dx + dy*dy)
+
+        if distance <= radius:
+
+            if t < best_t:
+                best_t = t
+                best = {
+                    "inundation": inundation,
+                    "t": t,
+                    "distance": distance
+                }
+
+    return best

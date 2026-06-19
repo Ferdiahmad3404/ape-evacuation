@@ -5,6 +5,7 @@ import "./Dataset.css";
 function Dataset() {
   const [nodesFile, setNodesFile] = useState(null);
   const [edgesFile, setEdgesFile] = useState(null);
+  const [inundationFile, setInundationFile] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -19,6 +20,7 @@ function Dataset() {
 
       formData.append("nodes_file", nodesFile);
       formData.append("edges_file", edgesFile);
+      formData.append("inundation_file", inundationFile);
 
       const response = await fetch("http://localhost:5000/api/datasets", {
         method: "POST",
@@ -26,8 +28,6 @@ function Dataset() {
       });
 
       const data = await response.json();
-
-      console.log(data);
 
       if (!response.ok) {
         alert(data.message || "Upload gagal");
@@ -85,6 +85,25 @@ function Dataset() {
               accept=".csv"
               onChange={(event) =>
                 setEdgesFile(event.target.files?.[0] ?? null)
+              }
+            />
+          </Flex>
+
+          <Flex
+            className="border-bottom"
+            direction="column"
+            align="stretch"
+            w="100%"
+            p="xs"
+            bg="#D9D9D9"
+          >
+            <h2>Inundation</h2>
+
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(event) =>
+                setInundationFile(event.target.files?.[0] ?? null)
               }
             />
           </Flex>
