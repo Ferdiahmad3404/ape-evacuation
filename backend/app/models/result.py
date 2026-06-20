@@ -9,11 +9,13 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     person_id = db.Column(db.Integer, nullable=False)
     ete_dijkstra = db.Column(db.Float, nullable=True)
+    ete_safe_dijkstra = db.Column(db.Float, nullable=True)
     node_information_dijkstra = db.Column(db.Text, nullable=True)
     edge_information_dijkstra = db.Column(db.Text, nullable=True)
     rst_dijkstra = db.Column(db.Float, nullable=True)
     geometry_dijkstra = db.Column(db.String, nullable=True)
     ete_dijkstra_rst = db.Column(db.Float, nullable=True)
+    ete_safe_dijkstra_rst = db.Column(db.Float, nullable=True)
     node_information_dijkstra_rst = db.Column(db.Text, nullable=True)
     edge_information_dijkstra_rst = db.Column(db.Text, nullable=True)
     rst_dijkstra_rst = db.Column(db.Float, nullable=True)
@@ -28,6 +30,7 @@ class Result(db.Model):
             "id": self.id,
             "person_id": self.person_id,
             "ete_dijkstra": self.ete_dijkstra,
+            "ete_safe_dijkstra": self.ete_safe_dijkstra,
             "node_information_dijkstra": self.node_information_dijkstra,
             "edge_information_dijkstra": self.edge_information_dijkstra,
             "geometry_dijkstra": self.geometry_dijkstra,

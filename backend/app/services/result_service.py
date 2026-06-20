@@ -19,15 +19,17 @@ class ResultService:
         return data
 
     @staticmethod
-    def save_result(person_id, ete_dijkstra, node_information_dijkstra, edge_information_dijkstra, geometry_dijkstra, rst_dijkstra, ete_dijkstra_rst, node_information_dijkstra_rst, edge_information_dijkstra_rst, rst_dijkstra_rst, geometry_dijkstra_rst, evacuation_point_name, movement_speed, route_dijkstra, route_dijkstra_rst):
+    def save_result(person_id, ete_dijkstra, ete_safe_dijkstra, node_information_dijkstra, edge_information_dijkstra, geometry_dijkstra, rst_dijkstra, ete_dijkstra_rst, ete_safe_dijkstra_rst, node_information_dijkstra_rst, edge_information_dijkstra_rst, rst_dijkstra_rst, geometry_dijkstra_rst, evacuation_point_name, movement_speed, route_dijkstra, route_dijkstra_rst):
         result = Result(
             person_id=person_id,
             ete_dijkstra=ete_dijkstra,
+            ete_safe_dijkstra=ete_safe_dijkstra,
             node_information_dijkstra=node_information_dijkstra,
             edge_information_dijkstra=edge_information_dijkstra,
             geometry_dijkstra=geometry_dijkstra,
             rst_dijkstra=rst_dijkstra,
             ete_dijkstra_rst=ete_dijkstra_rst,
+            ete_safe_dijkstra_rst=ete_safe_dijkstra_rst,
             node_information_dijkstra_rst=node_information_dijkstra_rst,
             edge_information_dijkstra_rst=edge_information_dijkstra_rst,
             rst_dijkstra_rst=rst_dijkstra_rst,
@@ -44,10 +46,11 @@ class ResultService:
         return result
     
     @staticmethod
-    def save_result_dijkstra(person_id, ete_dijkstra, geometry_dijkstra, movement_speed):
+    def save_result_dijkstra(person_id, ete_dijkstra, ete_safe_dijkstra, geometry_dijkstra, movement_speed):
         result = Result(
             person_id=person_id,
             ete_dijkstra=ete_dijkstra,
+            ete_safe_dijkstra=ete_safe_dijkstra,
             geometry_dijkstra=geometry_dijkstra,
             movement_speed=movement_speed
         )
@@ -58,10 +61,11 @@ class ResultService:
         return result
     
     @staticmethod
-    def save_result_dijkstra_rst(person_id, ete_dijkstra_rst, geometry_dijkstra_rst, movement_speed):
+    def save_result_dijkstra_rst(person_id, ete_dijkstra_rst, ete_safe_dijkstra_rst, geometry_dijkstra_rst, movement_speed):
         result = Result(
             person_id=person_id,
             ete_dijkstra_rst=ete_dijkstra_rst,
+            ete_safe_dijkstra_rst=ete_safe_dijkstra_rst,
             geometry_dijkstra_rst=geometry_dijkstra_rst,
             movement_speed=movement_speed
         )
