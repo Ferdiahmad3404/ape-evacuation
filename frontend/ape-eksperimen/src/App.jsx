@@ -87,8 +87,10 @@ function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
-  const isGraphBackground = mapBackground === "graph" || mapBackground === "both";
-  const showTileBackground = mapBackground === "map" || mapBackground === "both";
+  const isGraphBackground =
+    mapBackground === "graph" || mapBackground === "both";
+  const showTileBackground =
+    mapBackground === "map" || mapBackground === "both";
 
   const getNodeColor = (node, index) => {
     if (index === 0) {
@@ -162,8 +164,6 @@ function App() {
       try {
         const response = await fetch(filePath);
 
-        console.log("CSV status:", response.status);
-
         const text = await response.text();
 
         const lines = text.split("\n");
@@ -214,7 +214,7 @@ function App() {
             }}
           >
             <label>
-              Background Map: {" "}
+              Background Map:{" "}
               <select
                 value={mapBackground}
                 onChange={(e) => setMapBackground(e.target.value)}
@@ -226,7 +226,7 @@ function App() {
             </label>
 
             <label>
-              Boundary File: {" "}
+              Boundary File:{" "}
               <select
                 value={selectedBoundaryFile}
                 onChange={(e) => setSelectedBoundaryFile(e.target.value)}
@@ -254,8 +254,12 @@ function App() {
 
             {isGraphBackground &&
               graphEdges.map((edge) => {
-                const uNode = graphNodes.find((node) => node.node_id === edge.u);
-                const vNode = graphNodes.find((node) => node.node_id === edge.v);
+                const uNode = graphNodes.find(
+                  (node) => node.node_id === edge.u,
+                );
+                const vNode = graphNodes.find(
+                  (node) => node.node_id === edge.v,
+                );
 
                 if (!uNode || !vNode) return null;
 
@@ -282,9 +286,14 @@ function App() {
                   center={[node.latitude, node.longitude]}
                   radius={5}
                   pathOptions={{
-                    color: node.status === "evacuation_point" ? "#0f766e" : "#7c3aed",
+                    color:
+                      node.status === "evacuation_point"
+                        ? "#0f766e"
+                        : "#7c3aed",
                     fillColor:
-                      node.status === "evacuation_point" ? "#14b8a6" : "#a78bfa",
+                      node.status === "evacuation_point"
+                        ? "#14b8a6"
+                        : "#a78bfa",
                     fillOpacity: 0.9,
                     weight: 1,
                   }}
@@ -330,7 +339,7 @@ function App() {
                         {node.eta !== null && (
                           <>
                             <br />
-                            ETA: {node.eta}
+                            RsT: {Math.round(node.eta - 8 - 10)}
                           </>
                         )}
                       </div>
@@ -359,7 +368,7 @@ function App() {
                       {node.eta !== null && (
                         <>
                           <br />
-                          ETA: {node.eta}
+                          RsT: {Math.round(node.eta - 8 - 10)}
                         </>
                       )}
                     </div>

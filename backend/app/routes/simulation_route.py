@@ -38,6 +38,9 @@ def create_simulation():
 
     evacuation_points_data = NodeService.get_all_node_evacuation_points()
 
+    latest_eta_node_index = None
+    latest_eta_node = None
+    
     t_warning = 8
 
     t_reaction = 10
@@ -52,8 +55,10 @@ def create_simulation():
             "scenario",
             "path_dijkstra",
             "ete_dijkstra",
+            "ete_safe_dijkstra",
             "rst_dijkstra",
             "ete_dijkstra_rst",
+            "ete_safe_dijkstra_rst",
             "rst_dijkstra_rst",
             "path_dijkstra",
             "path_dijkstra_rst"
@@ -88,6 +93,17 @@ def create_simulation():
 
                 edge_information_dijkstra = get_edge_information_by_node_id(edges_data, path_dijkstra)
 
+                for idx, node in enumerate(node_information_dijkstra):
+                    if node["eta"] is None:
+                        break
+                    
+                    latest_eta_node_index = idx
+                    latest_eta_node = node
+                    
+                nearest_inundation = find_nearest_inundation(node_information_dijkstra[latest_eta_node_index + 1], node_information_dijkstra[latest_eta_node_index], inundation_data)
+                ete_inundation_safe_dijkstra = round(float(dist_dijkstra[str(latest_eta_node_index)]) + (haversine_distance(
+                    nearest_inundation["inundation"]["latitude"], nearest_inundation["inundation"]["longitude"], latest_eta_node["latitude"], latest_eta_node["longitude"]) / walking_speed / 60), 2)
+
                 geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
 
                 dist_dijkstra_rst, prev_dijkstra_rst = dijkstra_with_rst(
@@ -105,9 +121,6 @@ def create_simulation():
 
                 edge_information_dijkstra_rst = get_edge_information_by_node_id(edges_data, path_dijkstra_rst)
 
-                latest_eta_node_index = None
-                latest_eta_node = None
-
                 for idx, node in enumerate(node_information_dijkstra_rst):
                     if node["eta"] is None:
                         break
@@ -116,10 +129,9 @@ def create_simulation():
                     latest_eta_node = node
 
                 nearest_inundation = find_nearest_inundation(node_information_dijkstra_rst[latest_eta_node_index + 1], node_information_dijkstra_rst[latest_eta_node_index], inundation_data)
-                ete_inundation_save_dijkstra_rst = round(float(dist_dijkstra_rst[evac_point_id]) + (haversine_distance(
+                ete_inundation_safe_dijkstra_rst = round(float(dist_dijkstra_rst[str(latest_eta_node_index)]) + (haversine_distance(
                     nearest_inundation["inundation"]["latitude"], nearest_inundation["inundation"]["longitude"], latest_eta_node["latitude"], latest_eta_node["longitude"]) / walking_speed / 60), 2)
-                print(f"Latest ETA Node: {round(float(dist_dijkstra_rst[evac_point_id]), 2)}")
-                print(f"Updated Inundation Save (Dijkstra RsT): {ete_inundation_save_dijkstra_rst}")
+
                 geometries_dijkstra_rst = get_geometry_by_node_id(nodes_data, path_dijkstra_rst)
 
                 with open("eksperimen.csv", "a", newline="", encoding="utf-8") as file:
@@ -129,8 +141,10 @@ def create_simulation():
                         f"RsT2 - {person.id} - {evac_point_id} - {walking_speed} - R1",
                         json.dumps(path_dijkstra),
                         round(float(dist_dijkstra[evac_point_id]), 2),
+                        ete_inundation_safe_dijkstra,
                         round(lowest_eta_node - t_warning - t_reaction, 2),
                         round(float(dist_dijkstra_rst[evac_point_id]), 2),
+                        ete_inundation_safe_dijkstra_rst,
                         round(
                             latest_eta_node["eta"] - t_warning - t_reaction
                             if latest_eta_node else None,
