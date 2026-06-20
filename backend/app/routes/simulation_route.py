@@ -71,8 +71,8 @@ def create_simulation():
             scenario_id=scenario_id
         )
 
-        for walking_speed in walking_speeds:
-            for evac_point_id, evac_point in evacuation_points_data.items():
+        for evac_point_id, evac_point in evacuation_points_data.items():
+            for walking_speed in walking_speeds:
 
                 start_node_id = find_nearest_node(
                     nodes_data,
