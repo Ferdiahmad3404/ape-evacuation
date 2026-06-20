@@ -96,8 +96,10 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
             name: item.evacuation_point_name,
             movement_speed: item.movement_speed,
             ete_dijkstra: item.ete_dijkstra,
+            ete_safe_dijkstra: item.ete_safe_dijkstra,
             rst_dijkstra: item.rst_dijkstra,
             ete_dijkstra_rst: item.ete_dijkstra_rst,
+            ete_safe_dijkstra_rst: item.ete_safe_dijkstra_rst,
             rst_dijkstra_rst: item.rst_dijkstra_rst,
             node_information_dijkstra: JSON.parse(
               item.node_information_dijkstra,
@@ -251,130 +253,155 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           <Text fw={700}>Hasil Evakuasi</Text>
         </Flex>
 
-        <Flex className="table-header border-bottom">
-          <Flex className="table-col evacuation-col" p="sm">
-            <Text fw={700}>Titik Evakuasi</Text>
-          </Flex>
+        <div className="table-body">
+          <div className="table-header table-grid border-bottom">
+            <div className="table-col evacuation-col">
+              <Text fw={700}>Titik Akhir</Text>
+            </div>
 
-          <Flex
-            className="table-col algorithm-col border-left"
-            direction="column"
-            p="sm"
-          >
-            <Text fw={700}>Dijkstra</Text>
-            <Text size="xs" c="dimmed">
-              ETE / RST
-            </Text>
-          </Flex>
+            <div className="table-col metric-col border-left">
+              <Text fw={700}>ETE Dijsktra</Text>
+            </div>
 
-          <Flex
-            className="table-col route-col border-left"
-            direction="column"
-            p="sm"
-          >
-            <Text fw={700}>Route Dijkstra</Text>
-          </Flex>
+            <div className="table-col safe-col border-left">
+              <Text fw={700}>ETE Safe Dijkstra</Text>
+            </div>
 
-          <Flex
-            className="table-col algorithm-col border-left"
-            direction="column"
-            p="sm"
-          >
-            <Text fw={700}>Dijkstra + RsT</Text>
-            <Text size="xs" c="dimmed">
-              ETE / RST
-            </Text>
-          </Flex>
+            <div className="table-col rst-col border-left">
+              <Text fw={700}>RsT</Text>
+              <Text size="xs" c="dimmed">
+                batas waktu aman
+              </Text>
+            </div>
 
-          <Flex
-            className="table-col route-col border-left"
-            direction="column"
-            p="sm"
-          >
-            <Text fw={700}>Route Dijkstra + RsT</Text>
-          </Flex>
-        </Flex>
+            <div className="table-col route-col border-left">
+              <Text fw={700}>Rute Dijsktra</Text>
+            </div>
 
-        {evacuationPoints.map((point) => {
-          const isRowSelected = selectedRow === point.id;
+            <div className="table-col metric-col border-left">
+              <Text fw={700}>ETE Model Usulan</Text>
+            </div>
 
-          const isDijkstraSelected =
-            selectedCell.rowId === point.id && selectedCell.type === "dijkstra";
+            <div className="table-col safe-col border-left">
+              <Text fw={700}>ETE Safe Model Usulan</Text>
+            </div>
 
-          const isDijkstraRSTSelected =
-            selectedCell.rowId === point.id &&
-            selectedCell.type === "dijkstra_rst";
+            <div className="table-col rst-col border-left">
+              <Text fw={700}>RsT</Text>
+              <Text size="xs" c="dimmed">
+                batas waktu aman
+              </Text>
+            </div>
 
-          return (
-            <Flex
-              key={point.id}
-              className={`table-row border-bottom ${
-                isRowSelected ? "selected-row" : ""
-              }`}
-            >
-              <Flex
-                className="table-col evacuation-col selectable-cell"
-                p="sm"
-                align="center"
-                onClick={() => handleRowClick(point)}
-              >
-                <Text>{point.name}</Text>
-              </Flex>
+            <div className="table-col route-col border-left">
+              <Text fw={700}>Rute Model Usulan</Text>
+            </div>
+          </div>
 
-              <Flex
-                className={`table-col algorithm-col border-left selectable-cell ${
-                  isDijkstraSelected ? "selected-cell" : ""
+          {evacuationPoints.map((point) => {
+            const isRowSelected = selectedRow === point.id;
+
+            const isDijkstraSelected =
+              selectedCell.rowId === point.id &&
+              selectedCell.type === "dijkstra";
+
+            const isDijkstraRSTSelected =
+              selectedCell.rowId === point.id &&
+              selectedCell.type === "dijkstra_rst";
+
+            return (
+              <div
+                key={point.id}
+                className={`table-row table-grid border-bottom ${
+                  isRowSelected ? "selected-row" : ""
                 }`}
-                direction="column"
-                p="sm"
-                gap="xs"
-                onClick={(event) => handleCellClick(point, "dijkstra", event)}
               >
-                <Text size="sm">{formatMinutes(point.ete_dijkstra)}</Text>
-                <Text size="xs" c="dimmed">
-                  RST: {formatMinutes(point.rst_dijkstra)}
-                </Text>
-              </Flex>
+                <div
+                  className="table-col evacuation-col selectable-cell"
+                  onClick={() => handleRowClick(point)}
+                >
+                  <Text>{point.name}</Text>
+                </div>
 
-              <Flex
-                className="table-col route-col border-left selectable-cell"
-                direction="column"
-                p="sm"
-              >
-                <Text size="sm" className="route-text">
-                  {formatRoute(point.route_dijkstra)}
-                </Text>
-              </Flex>
+                <div
+                  className={`table-col metric-col border-left selectable-cell ${
+                    isDijkstraSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) => handleCellClick(point, "dijkstra", event)}
+                >
+                  <Text size="sm">{formatMinutes(point.ete_dijkstra)}</Text>
+                </div>
 
-              <Flex
-                className={`table-col algorithm-col border-left selectable-cell ${
-                  isDijkstraRSTSelected ? "selected-cell" : ""
-                }`}
-                direction="column"
-                p="sm"
-                gap="xs"
-                onClick={(event) =>
-                  handleCellClick(point, "dijkstra_rst", event)
-                }
-              >
-                <Text size="sm">{formatMinutes(point.ete_dijkstra_rst)}</Text>
-                <Text size="xs" c="dimmed">
-                  RST: {formatMinutes(point.rst_dijkstra_rst)}
-                </Text>
-              </Flex>
+                <div
+                  className={`table-col safe-col border-left selectable-cell ${
+                    isDijkstraSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) => handleCellClick(point, "dijkstra", event)}
+                >
+                  <Text size="sm">
+                    {formatMinutes(point.ete_safe_dijkstra)}
+                  </Text>
+                </div>
 
-              <Flex
-                className="table-col route-col border-left selectable-cell"
-                direction="column"
-                p="sm"
-              >
-                <Text size="sm" className="route-text">
-                  {formatRoute(point.route_dijkstra_rst)}
-                </Text>
-              </Flex>
-            </Flex>
-          );
-        })}
+                <div
+                  className={`table-col rst-col border-left selectable-cell ${
+                    isDijkstraSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) => handleCellClick(point, "dijkstra", event)}
+                >
+                  <Text size="sm">{formatMinutes(point.rst_dijkstra)}</Text>
+                </div>
+
+                <div className="table-col route-col border-left selectable-cell">
+                  <Text size="sm" className="route-text">
+                    {formatRoute(point.route_dijkstra)}
+                  </Text>
+                </div>
+
+                <div
+                  className={`table-col metric-col border-left selectable-cell ${
+                    isDijkstraRSTSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) =>
+                    handleCellClick(point, "dijkstra_rst", event)
+                  }
+                >
+                  <Text size="sm">{formatMinutes(point.ete_dijkstra_rst)}</Text>
+                </div>
+
+                <div
+                  className={`table-col safe-col border-left selectable-cell ${
+                    isDijkstraRSTSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) =>
+                    handleCellClick(point, "dijkstra_rst", event)
+                  }
+                >
+                  <Text size="sm">
+                    {formatMinutes(point.ete_safe_dijkstra_rst)}
+                  </Text>
+                </div>
+
+                <div
+                  className={`table-col rst-col border-left selectable-cell ${
+                    isDijkstraRSTSelected ? "selected-cell" : ""
+                  }`}
+                  onClick={(event) =>
+                    handleCellClick(point, "dijkstra_rst", event)
+                  }
+                >
+                  <Text size="sm">{formatMinutes(point.rst_dijkstra_rst)}</Text>
+                </div>
+
+                <div className="table-col route-col border-left selectable-cell">
+                  <Text size="sm" className="route-text">
+                    {formatRoute(point.route_dijkstra_rst)}
+                  </Text>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Flex>
     </Paper>
   );

@@ -62,7 +62,7 @@ function Scenario() {
             Kembali
           </Button>
 
-          <Text fw={700}>Daftar Person</Text>
+          <Text fw={700}>Daftar Titik Keberangkatan</Text>
         </Flex>
 
         {loading ? (
@@ -80,7 +80,7 @@ function Scenario() {
               onClick={() => handleClick(person)}
               style={{ cursor: "pointer" }}
             >
-              <h2>Person {index + 1}</h2>
+              <h2>Titik Keberangkatan {index + 1}</h2>
 
               <Flex direction="row" gap="xs">
                 <Text size="sm">

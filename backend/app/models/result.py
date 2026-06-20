@@ -36,6 +36,7 @@ class Result(db.Model):
             "geometry_dijkstra": self.geometry_dijkstra,
             "rst_dijkstra": self.rst_dijkstra,
             "ete_dijkstra_rst": self.ete_dijkstra_rst,
+            "ete_safe_dijkstra_rst": self.ete_safe_dijkstra_rst,
             "node_information_dijkstra_rst": self.node_information_dijkstra_rst,
             "edge_information_dijkstra_rst": self.edge_information_dijkstra_rst,
             "geometry_dijkstra_rst": self.geometry_dijkstra_rst,

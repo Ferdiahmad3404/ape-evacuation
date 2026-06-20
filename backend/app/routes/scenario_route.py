@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, json, jsonify, request
 
 from ..services.person_service import PersonService
 from ..services.scenario_service import ScenarioService
@@ -29,7 +29,8 @@ def get_persons_by_scenario(scenario_id):
 @scenario_bp.get("/scenarios/<scenario_id>/<person_id>")
 def get_results_by_scenario_and_person(scenario_id, person_id):
     result = ResultService.get_all_result_by_person_id(person_id)
-
+    with open("result.json", "w") as file:
+        json.dump(result, file, indent=4)
     return jsonify({
         "scenario_id": scenario_id,
         "person_id": person_id,
