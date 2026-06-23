@@ -102,8 +102,7 @@ def create_simulation():
 
                 nearest_inundation = find_nearest_inundation(node_information_dijkstra[latest_eta_node_index + 1], node_information_dijkstra[latest_eta_node_index], inundation_data)
 
-                ete_safe_dijkstra = round(float(dist_dijkstra[path_dijkstra[latest_eta_node_index]]) + (haversine_distance(
-                    nearest_inundation["inundation"]["latitude"], nearest_inundation["inundation"]["longitude"], latest_eta_node["latitude"], latest_eta_node["longitude"]) / walking_speed / 60), 2)
+                ete_safe_dijkstra = round(float(dist_dijkstra[path_dijkstra[latest_eta_node_index]]),2)
 
                 geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
 
@@ -131,8 +130,7 @@ def create_simulation():
 
                 nearest_inundation = find_nearest_inundation(node_information_dijkstra_rst[latest_eta_node_index + 1], node_information_dijkstra_rst[latest_eta_node_index], inundation_data)
 
-                ete_safe_dijkstra_rst = round(float(dist_dijkstra_rst[path_dijkstra_rst[latest_eta_node_index]]) + (haversine_distance(
-                    nearest_inundation["inundation"]["latitude"], nearest_inundation["inundation"]["longitude"], latest_eta_node["latitude"], latest_eta_node["longitude"]) / walking_speed / 60), 2)
+                ete_safe_dijkstra_rst = round(float(dist_dijkstra_rst[path_dijkstra_rst[latest_eta_node_index]]),2)
 
                 geometries_dijkstra_rst = get_geometry_by_node_id(nodes_data, path_dijkstra_rst)
 
