@@ -8,7 +8,7 @@ class Graph(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     node = db.Column(db.String(50),  nullable=False)
     neighbors = db.Column(db.String, nullable=False)
-    scenario_name = db.Column(db.String(50), nullable=False)
+    scenario_name = db.Column(db.String(100), nullable=False)
 
     def to_dict(self):
         return {
