@@ -99,6 +99,8 @@ def create_simulation():
                     
                     latest_eta_node = node
 
+                ete_safe_dijkstra = dist_dijkstra[latest_eta_node["node_id"]]
+
                 geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
 
                 dist_dijkstra_rst, prev_dijkstra_rst = dijkstra_with_rst(
@@ -121,7 +123,9 @@ def create_simulation():
                         break
                     
                     latest_eta_node = node
-
+            
+                ete_safe_dijkstra_rst = dist_dijkstra_rst[latest_eta_node["node_id"]]
+            
                 geometries_dijkstra_rst = get_geometry_by_node_id(nodes_data, path_dijkstra_rst)
 
                 with open("eksperimen.csv", "a", newline="", encoding="utf-8") as file:
@@ -131,10 +135,10 @@ def create_simulation():
                         f"RsT2 - {person.id} - {evac_point_id} - {walking_speed} - R1",
                         json.dumps(path_dijkstra),
                         round(float(dist_dijkstra[evac_point_id]), 2),
-                        round(latest_eta_node["eta"] - t_warning - t_reaction, 2),
+                        round(ete_safe_dijkstra, 2),
                         round(lowest_eta_node - t_warning - t_reaction, 2),
                         round(float(dist_dijkstra_rst[evac_point_id]), 2),
-                        round(latest_eta_node["eta"] - t_warning - t_reaction, 2),
+                        round(ete_safe_dijkstra_rst, 2),
                         round(
                             latest_eta_node["eta"] - t_warning - t_reaction
                             if latest_eta_node else None,
