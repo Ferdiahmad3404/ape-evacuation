@@ -1,6 +1,29 @@
 import { Fragment } from "react";
 import { Polyline, Tooltip } from "react-leaflet";
 
+const getRouteStrokeStyle = (routeColor) => {
+  const normalizedColor = String(routeColor || "").toLowerCase();
+
+  if (normalizedColor === "orange") {
+    return {
+      color: "#ff2d8f",
+      dashArray: "10 8",
+    };
+  }
+
+  if (normalizedColor === "blue") {
+    return {
+      color: "#00c2ff",
+      dashArray: undefined,
+    };
+  }
+
+  return {
+    color: routeColor || "#00c2ff",
+    dashArray: undefined,
+  };
+};
+
 function RouteLines({ routes = [], nodes = [], edges = [] }) {
   if (!routes.length) return null;
 
@@ -10,12 +33,27 @@ function RouteLines({ routes = [], nodes = [], edges = [] }) {
     <>
       {routes.map((route, routeIndex) => (
         <Fragment key={`route-group-${routeIndex}`}>
+          {/* Layer casing gelap agar rute tetap kontras di atas garis jalan */}
+          <Polyline
+            positions={route.geometry}
+            pathOptions={{
+              color: "#111827",
+              weight: 10,
+              opacity: 0.9,
+              lineCap: "round",
+              lineJoin: "round",
+            }}
+          />
+
           {/* Garis rute utama */}
           <Polyline
             positions={route.geometry}
             pathOptions={{
-              color: route.color,
+              ...getRouteStrokeStyle(route.color),
               weight: 5,
+              opacity: 1,
+              lineCap: "round",
+              lineJoin: "round",
             }}
           />
 

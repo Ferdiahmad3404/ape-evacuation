@@ -3,14 +3,13 @@ import csv
 from flask import Blueprint, json, jsonify, request
 
 
-from ..services.inundation_service import InundationService
 from ..services.edge_service import EdgeService
 from ..services.graph_service import GraphService
 from ..services.node_service import NodeService
 from ..services.result_service import ResultService
 from ..services.scenario_service import ScenarioService
 from ..services.person_service import PersonService
-from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id, get_node_information_by_node_id, get_edge_information_by_node_id, find_nearest_inundation, haversine_distance
+from ..utils.shortest_path_algorithm import dijkstra, dijkstra_with_rst, find_nearest_node, reconstruct_path, get_geometry_by_node_id, get_node_information_by_node_id, get_edge_information_by_node_id
 
 simulation_bp = Blueprint("simulation", __name__)
 
@@ -31,8 +30,6 @@ def create_simulation():
     nodes_data = NodeService.get_all_nodes()
 
     edges_data = EdgeService.get_all_edges()
-
-    inundation_data = InundationService.get_all_inundations()
 
     lowest_eta_node = NodeService.get_lowest_eta_node()['eta']
 
@@ -99,7 +96,9 @@ def create_simulation():
                     
                     latest_eta_node = node
 
-                ete_safe_dijkstra = dist_dijkstra[latest_eta_node["node_id"]]
+                ete_dijkstra = round((dist_dijkstra[evac_point_id] / walking_speed) / 60, 2)
+
+                ete_safe_dijkstra = round((dist_dijkstra[latest_eta_node["node_id"]] / walking_speed) / 60, 2)
 
                 geometries_dijkstra = get_geometry_by_node_id(nodes_data, path_dijkstra)
 
@@ -123,9 +122,11 @@ def create_simulation():
                         break
                     
                     latest_eta_node = node
-            
-                ete_safe_dijkstra_rst = dist_dijkstra_rst[latest_eta_node["node_id"]]
-            
+
+                ete_dijkstra_rst = round((dist_dijkstra_rst[evac_point_id] / walking_speed) / 60, 2)
+
+                ete_safe_dijkstra_rst = round((dist_dijkstra_rst[latest_eta_node["node_id"]] / walking_speed) / 60, 2)
+
                 geometries_dijkstra_rst = get_geometry_by_node_id(nodes_data, path_dijkstra_rst)
 
                 with open("eksperimen.csv", "a", newline="", encoding="utf-8") as file:
@@ -134,10 +135,10 @@ def create_simulation():
                     writer.writerow([
                         f"RsT2 - {person.id} - {evac_point_id} - {walking_speed} - R1",
                         json.dumps(path_dijkstra),
-                        round(float(dist_dijkstra[evac_point_id]), 2),
+                        round(ete_dijkstra, 2),
                         round(ete_safe_dijkstra, 2),
                         round(lowest_eta_node - t_warning - t_reaction, 2),
-                        round(float(dist_dijkstra_rst[evac_point_id]), 2),
+                        round(ete_dijkstra_rst, 2),
                         round(ete_safe_dijkstra_rst, 2),
                         round(
                             latest_eta_node["eta"] - t_warning - t_reaction
@@ -150,14 +151,14 @@ def create_simulation():
                 
                 ResultService.save_result(
                     person.id,
-                    round(float(dist_dijkstra[evac_point_id]), 2),
+                    round(ete_dijkstra, 2),
                     round(latest_eta_node["eta"] - t_warning - t_reaction, 2),
                     json.dumps(node_information_dijkstra),
                     json.dumps(edge_information_dijkstra),
                     json.dumps(geometries_dijkstra),
                     round(lowest_eta_node - t_warning - t_reaction, 2),
-                    round(float(dist_dijkstra_rst[evac_point_id]), 2),
-                    round(latest_eta_node["eta"] - t_warning - t_reaction, 2),
+                    round(ete_dijkstra_rst, 2),
+                    round(ete_safe_dijkstra_rst, 2),
                     json.dumps(node_information_dijkstra_rst),
                     json.dumps(edge_information_dijkstra_rst),
                     round(latest_eta_node["eta"] - t_warning - t_reaction if latest_eta_node else None, 2),

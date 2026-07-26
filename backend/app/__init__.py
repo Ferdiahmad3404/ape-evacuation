@@ -29,7 +29,6 @@ def create_app():
         from .models import person
         from .models import result
         from .models import scenario
-        from .models import inundation
 
         db.create_all()
 

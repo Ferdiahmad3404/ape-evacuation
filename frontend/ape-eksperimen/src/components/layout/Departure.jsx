@@ -72,6 +72,36 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
       : "-";
   };
 
+  const getDijkstraEteColor = (point) => {
+    const eteValue = Number(point.ete_dijkstra);
+    const rstValue = Number(point.rst_dijkstra);
+
+    if (!Number.isFinite(eteValue) || !Number.isFinite(rstValue)) {
+      return "dark";
+    }
+
+    if (eteValue < rstValue) {
+      return "green";
+    }
+
+    return "red";
+  };
+
+  const getUsulanSafeEteColor = (point) => {
+    const eteValue = Number(point.ete_safe_dijkstra_rst);
+    const rstValue = Number(point.rst_dijkstra_rst);
+
+    if (!Number.isFinite(eteValue) || !Number.isFinite(rstValue)) {
+      return "dark";
+    }
+
+    if (eteValue < rstValue) {
+      return "green";
+    }
+
+    return "red";
+  };
+
   useEffect(() => {
     const fetchResult = async () => {
       try {
@@ -223,34 +253,68 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           align="center"
           p="xs"
         >
-          <Button
-            variant="light"
-            size="xs"
-            leftSection={<IconArrowLeft size={16} />}
-            onClick={handleBack}
-          >
-            Kembali
-          </Button>
+          <Flex align="center" gap="sm">
+            <Button
+              variant="light"
+              size="xs"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={handleBack}
+            >
+              Kembali
+            </Button>
 
-          <Select
-            w={160}
-            label="Speed Walk"
-            size="xs"
-            value={selectedSpeedWalk}
-            onChange={(value) => {
-              if (value !== null) {
-                setSelectedSpeedWalk(value);
-              }
-            }}
-            allowDeselect={false}
-            clearable={false}
-            data={speedWalk.map((item) => ({
-              value: item.value.toString(),
-              label: `${item.name} (${item.value})`,
-            }))}
-          />
+            <Select
+              w={160}
+              label="Speed Walk"
+              size="xs"
+              value={selectedSpeedWalk}
+              onChange={(value) => {
+                if (value !== null) {
+                  setSelectedSpeedWalk(value);
+                }
+              }}
+              allowDeselect={false}
+              clearable={false}
+              data={speedWalk.map((item) => ({
+                value: item.value.toString(),
+                label: `${item.name} (${item.value})`,
+              }))}
+            />
+          </Flex>
 
-          <Text fw={700}>Hasil Evakuasi</Text>
+          <Flex direction="column" align="flex-end" gap={4}>
+            <Text fw={700}>Hasil Evakuasi</Text>
+            <Flex gap="sm" align="center" wrap="wrap" justify="flex-end">
+              <Text size="xs" c="dimmed">
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 10,
+                    height: 10,
+                    borderRadius: 999,
+                    backgroundColor: "#2f9e44",
+                    marginRight: 6,
+                    verticalAlign: "middle",
+                  }}
+                />
+                hijau = berhasil
+              </Text>
+              <Text size="xs" c="dimmed">
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 10,
+                    height: 10,
+                    borderRadius: 999,
+                    backgroundColor: "#e03131",
+                    marginRight: 6,
+                    verticalAlign: "middle",
+                  }}
+                />
+                merah = gagal
+              </Text>
+            </Flex>
+          </Flex>
         </Flex>
 
         <div className="table-body">
@@ -261,10 +325,6 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
 
             <div className="table-col metric-col border-left">
               <Text fw={700}>ETE Dijsktra</Text>
-            </div>
-
-            <div className="table-col safe-col border-left">
-              <Text fw={700}>ETE Safe Dijkstra</Text>
             </div>
 
             <div className="table-col rst-col border-left">
@@ -329,17 +389,8 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                   }`}
                   onClick={(event) => handleCellClick(point, "dijkstra", event)}
                 >
-                  <Text size="sm">{formatMinutes(point.ete_dijkstra)}</Text>
-                </div>
-
-                <div
-                  className={`table-col safe-col border-left selectable-cell ${
-                    isDijkstraSelected ? "selected-cell" : ""
-                  }`}
-                  onClick={(event) => handleCellClick(point, "dijkstra", event)}
-                >
-                  <Text size="sm">
-                    {formatMinutes(point.ete_safe_dijkstra)}
+                  <Text size="sm" c={getDijkstraEteColor(point)}>
+                    {formatMinutes(point.ete_dijkstra)}
                   </Text>
                 </div>
 
@@ -377,7 +428,7 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                     handleCellClick(point, "dijkstra_rst", event)
                   }
                 >
-                  <Text size="sm">
+                  <Text size="sm" c={getUsulanSafeEteColor(point)}>
                     {formatMinutes(point.ete_safe_dijkstra_rst)}
                   </Text>
                 </div>

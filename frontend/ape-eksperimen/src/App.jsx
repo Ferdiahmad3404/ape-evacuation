@@ -101,7 +101,35 @@ function App() {
       return "#2563eb";
     }
 
+    if (node.status === "inundation") {
+      return "#f59e0b";
+    }
+
     return "#ef4444";
+  };
+
+  const getGraphNodeBorderColor = (node) => {
+    if (node.status === "evacuation_point") {
+      return "#0f766e";
+    }
+
+    if (node.status === "inundation") {
+      return "#b45309";
+    }
+
+    return "#7c3aed";
+  };
+
+  const getGraphNodeFillColor = (node) => {
+    if (node.status === "evacuation_point") {
+      return "#14b8a6";
+    }
+
+    if (node.status === "inundation") {
+      return "#f59e0b";
+    }
+
+    return "#a78bfa";
   };
 
   useEffect(() => {
@@ -286,14 +314,8 @@ function App() {
                   center={[node.latitude, node.longitude]}
                   radius={5}
                   pathOptions={{
-                    color:
-                      node.status === "evacuation_point"
-                        ? "#0f766e"
-                        : "#7c3aed",
-                    fillColor:
-                      node.status === "evacuation_point"
-                        ? "#14b8a6"
-                        : "#a78bfa",
+                    color: getGraphNodeBorderColor(node),
+                    fillColor: getGraphNodeFillColor(node),
                     fillOpacity: 0.9,
                     weight: 1,
                   }}

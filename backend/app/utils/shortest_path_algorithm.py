@@ -1,47 +1,47 @@
 import math, json
 
-import json
-
 def dijkstra(graph, source, target, walking_speed):
     dist = {}
     prev = {}
     visited = {}
+    queue = {}
 
     for v in graph:
-        dist[v] = float('inf')
+        dist[v] = float("inf")
         prev[v] = None
         visited[v] = False
+        queue[v] = False
 
     dist[source] = 0
-    queue = {source}
+    queue[source] = True
 
-    while queue:
-        u = min(queue, key=lambda vertex: dist[vertex])
-        queue.remove(u)
+    while any(queue.values()):
 
-        visited[u] = True
+        active_nodes = [v for v in queue if queue[v]]
+        u = min(active_nodes, key=lambda vertex: dist[vertex])
 
         if u == target:
             break
+
+        queue[u] = False
+        visited[u] = True
 
         neighbors = graph[u]["neighbors"]
 
         for v, edge in neighbors.items():
 
-            if v not in visited:
-                continue
-
             if visited[v]:
                 continue
-            
-            alt = dist[u] + round(float((edge['length'] / walking_speed) / 60), 2)
+
+            alt = dist[u] + round(edge["length"], 2)
 
             if alt < dist[v]:
                 dist[v] = alt
                 prev[v] = u
-                queue.add(v)
+                queue[v] = True
 
     return dist, prev
+
 
 def dijkstra_with_rst(
     graph,
@@ -80,10 +80,7 @@ def dijkstra_with_rst(
 
         for v, edge in neighbors.items():
 
-            if v not in visited:
-                continue
-
-            if visited.get(v, False):
+            if visited[v]:
                 continue
 
             if edge.get("eta") is not None:
@@ -91,15 +88,17 @@ def dijkstra_with_rst(
             else:
                 rst = float("inf")
 
-            alt = dist[u] + round(float((edge['length'] / walking_speed) / 60), 2)
+            alt = dist[u] + round(edge["length"], 2)
 
-            if not alt < rst:
+            if ((alt / walking_speed) / 60) < rst:
+
+                if alt < dist[v]:
+                    dist[v] = alt
+                    prev[v] = u
+                    queue[v] = True
+
+            else:
                 continue
-
-            if alt < dist[v]:
-                dist[v] = alt
-                prev[v] = u
-                queue[v] = True
 
     return dist, prev
 
@@ -116,8 +115,7 @@ def reconstruct_path(previous_nodes, start_node, end_node):
 
     return path
 
-def haversine_distance(lat1, lon1, lat2, lon2):
-    R = 6371000
+def haversine_distance(lat1, lon1, lat2, lon2, R=6371000):
     d_lat = math.radians(lat2 - lat1)
     d_lon = math.radians(lon2 - lon1)
     a = math.sin(d_lat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2) ** 2
@@ -222,38 +220,3 @@ def latlon_to_xy(lat, lon):
     x = math.radians(lon) * R * math.cos(math.radians(lat))
     y = math.radians(lat) * R
     return x, y
-
-
-def find_nearest_inundation(nodeA, nodeB, inundation_data, radius=50):
-    ax, ay = latlon_to_xy(nodeA["latitude"], nodeA["longitude"])
-    bx, by = latlon_to_xy(nodeB["latitude"], nodeB["longitude"])
-
-    best = None
-    best_t = float("inf")
-
-    for inundation in inundation_data.values():
-
-        px, py = latlon_to_xy(inundation["latitude"], inundation["longitude"])
-
-        qx, qy, t = project_point_to_segment(ax, ay, bx, by, px, py)
-
-        dist = haversine_distance(
-            inundation["latitude"], inundation["longitude"],
-            nodeA["latitude"] + 0, nodeA["longitude"] + 0
-        )
-
-        dx = px - qx
-        dy = py - qy
-        distance = math.sqrt(dx*dx + dy*dy)
-
-        if distance <= radius:
-
-            if t < best_t:
-                best_t = t
-                best = {
-                    "inundation": inundation,
-                    "t": t,
-                    "distance": distance
-                }
-
-    return best
