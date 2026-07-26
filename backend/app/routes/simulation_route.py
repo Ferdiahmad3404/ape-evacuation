@@ -38,7 +38,7 @@ def create_simulation():
     latest_eta_node_index = None
     latest_eta_node = None
     
-    t_warning = 8
+    t_warning = 17
 
     t_reaction = 10
 

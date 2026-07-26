@@ -1,4 +1,5 @@
 from sqlalchemy import func
+import math
 
 from ..extensions import db
 
@@ -26,21 +27,30 @@ class Result(db.Model):
     route_dijkstra_rst = db.Column(db.String, nullable=True)
 
     def to_dict(self):
+        def _normalize_number(value):
+            if value is None:
+                return None
+
+            if isinstance(value, (int, float)) and not math.isfinite(value):
+                return None
+
+            return value
+
         return {
             "id": self.id,
             "person_id": self.person_id,
-            "ete_dijkstra": self.ete_dijkstra,
-            "ete_safe_dijkstra": self.ete_safe_dijkstra,
+            "ete_dijkstra": _normalize_number(self.ete_dijkstra),
+            "ete_safe_dijkstra": _normalize_number(self.ete_safe_dijkstra),
             "node_information_dijkstra": self.node_information_dijkstra,
             "edge_information_dijkstra": self.edge_information_dijkstra,
             "geometry_dijkstra": self.geometry_dijkstra,
-            "rst_dijkstra": self.rst_dijkstra,
-            "ete_dijkstra_rst": self.ete_dijkstra_rst,
-            "ete_safe_dijkstra_rst": self.ete_safe_dijkstra_rst,
+            "rst_dijkstra": _normalize_number(self.rst_dijkstra),
+            "ete_dijkstra_rst": _normalize_number(self.ete_dijkstra_rst),
+            "ete_safe_dijkstra_rst": _normalize_number(self.ete_safe_dijkstra_rst),
             "node_information_dijkstra_rst": self.node_information_dijkstra_rst,
             "edge_information_dijkstra_rst": self.edge_information_dijkstra_rst,
             "geometry_dijkstra_rst": self.geometry_dijkstra_rst,
-            "rst_dijkstra_rst": self.rst_dijkstra_rst,
+            "rst_dijkstra_rst": _normalize_number(self.rst_dijkstra_rst),
             "evacuation_point_name": self.evacuation_point_name,
             "movement_speed": self.movement_speed,
             "route_dijkstra": self.route_dijkstra,

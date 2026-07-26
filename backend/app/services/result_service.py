@@ -1,6 +1,5 @@
 from ..extensions import db
 from ..models.result import Result
-import math
 
 class ResultService:
     @staticmethod
@@ -9,12 +8,7 @@ class ResultService:
 
         data = []
         for res in result:
-            row = res.to_dict()
-
-            if row.get("ete_dijkstra_rst") is not None and math.isinf(row["ete_dijkstra_rst"]):
-                row["ete_dijkstra_rst"] = None
-
-            data.append(row)
+            data.append(res.to_dict())
 
         return data
 

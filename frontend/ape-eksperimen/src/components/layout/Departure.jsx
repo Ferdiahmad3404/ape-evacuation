@@ -150,6 +150,8 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           };
         });
 
+        console.log("Mapped Data:", mappedData);
+
         setRawData(mappedData);
       } catch (error) {
         console.error(error);
