@@ -32,13 +32,13 @@
 .departure {
   position: fixed;
 
-  top: 16px;
-  right: 16px;
+  top: 60px;
+  right: 24px;
 
-  width: 560px;
-  max-width: calc(100vw - 32px);
+  width: 520px;
+  max-width: calc(100vw - 48px);
 
-  height: calc(100vh - 32px);
+  height: calc(100vh - 100px);
 
   z-index: 1000;
 
@@ -75,15 +75,15 @@
    BORDER UTIL
 ========================= */
 .border {
-  border: 1px solid #d9d9d9;
+  border: 1px solid #000;
 }
 
 .border-bottom {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #000;
 }
 
 .border-left {
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid #000;
 }
 
 /* =========================
@@ -91,7 +91,7 @@
 ========================= */
 .table-header {
   display: grid !important;
-  grid-template-columns: 220px 110px 130px 110px 240px 120px 140px 110px 240px;
+  grid-template-columns: 220px 110px 130px 110px 240px 120px 140px 240px;
 
   width: max-content;
   min-width: 100%;
@@ -106,7 +106,7 @@
 
 .table-row {
   display: grid !important;
-  grid-template-columns: 220px 110px 130px 110px 240px 120px 140px 110px 240px;
+  grid-template-columns: 220px 110px 130px 110px 240px 120px 140px 240px;
   width: max-content;
   min-width: 100%;
 
@@ -187,9 +187,32 @@
   background-color: #dbeafe;
 }
 
+.status-success {
+  background-color: #80ff6b;
+}
+
+.status-fail {
+  background-color: #ff6767;
+}
+
+.status-success-selected {
+  background-color: #7dba72 !important;
+}
+
+.status-fail-selected {
+  background-color: #d46a6a !important;
+}
+
+.status-success .mantine-Text-root,
+.status-fail .mantine-Text-root,
+.status-success-selected .mantine-Text-root,
+.status-fail-selected .mantine-Text-root {
+  color: #000;
+}
+
 .route-text {
   width: 100%;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   line-height: 1.35;
   text-align: left;
 }
@@ -215,9 +238,11 @@
   align-items: center;
   gap: 12px;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #000;
 
   background: white;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 
   position: sticky;
   top: 0;

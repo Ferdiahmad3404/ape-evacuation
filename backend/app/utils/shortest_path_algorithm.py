@@ -115,12 +115,14 @@ def reconstruct_path(previous_nodes, start_node, end_node):
 
     return path
 
-def haversine_distance(lat1, lon1, lat2, lon2, R=6371000):
+def haversine_distance(lat1, lon1, lat2, lon2, radius=6371000):
+    latitude1 = math.radians(lat1)
+    latitude2 = math.radians(lat2)
     d_lat = math.radians(lat2 - lat1)
     d_lon = math.radians(lon2 - lon1)
-    a = math.sin(d_lat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lon / 2) ** 2
+    a = math.sin(d_lat / 2) ** 2 + math.cos(latitude1) * math.cos(latitude2) * math.sin(d_lon / 2) ** 2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
+    return radius * c
 
 def find_nearest_node(nodes, latitude, longitude):
     nearest_node = None

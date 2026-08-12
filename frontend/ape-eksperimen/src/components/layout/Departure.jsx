@@ -4,6 +4,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import "./Departure.css";
 
+const STATUS_COLORS = {
+  safe: {
+    base: "#80ff6b",
+    selected: "#7dba72",
+  },
+  unsafe: {
+    base: "#ff6767",
+    selected: "#d46a6a",
+  },
+};
+
+const getStatusClass = (isSuccess, isHighlighted) => {
+  if (isSuccess) {
+    return isHighlighted ? "status-success-selected" : "status-success";
+  }
+
+  return isHighlighted ? "status-fail-selected" : "status-fail";
+};
+
 function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
   const navigate = useNavigate();
   const { scenario_id, departure_point_id } = useParams();
@@ -72,34 +91,26 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
       : "-";
   };
 
-  const getDijkstraEteColor = (point) => {
+  const getDijkstraStatusClass = (point, isHighlighted = false) => {
     const eteValue = Number(point.ete_dijkstra);
     const rstValue = Number(point.rst_dijkstra);
 
     if (!Number.isFinite(eteValue) || !Number.isFinite(rstValue)) {
-      return "dark";
+      return "";
     }
 
-    if (eteValue < rstValue) {
-      return "green";
-    }
-
-    return "red";
+    return getStatusClass(eteValue < rstValue, isHighlighted);
   };
 
-  const getUsulanSafeEteColor = (point) => {
+  const getUsulanStatusClass = (point, isHighlighted = false) => {
     const eteValue = Number(point.ete_safe_dijkstra_rst);
     const rstValue = Number(point.rst_dijkstra_rst);
 
     if (!Number.isFinite(eteValue) || !Number.isFinite(rstValue)) {
-      return "dark";
+      return "";
     }
 
-    if (eteValue < rstValue) {
-      return "green";
-    }
-
-    return "red";
+    return getStatusClass(eteValue < rstValue, isHighlighted);
   };
 
   useEffect(() => {
@@ -287,33 +298,33 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
           <Flex direction="column" align="flex-end" gap={4}>
             <Text fw={700}>Hasil Evakuasi</Text>
             <Flex gap="sm" align="center" wrap="wrap" justify="flex-end">
-              <Text size="xs" c="dimmed">
+              <Text size="xs">
                 <span
                   style={{
                     display: "inline-block",
                     width: 10,
                     height: 10,
-                    borderRadius: 999,
-                    backgroundColor: "#2f9e44",
+                    backgroundColor: STATUS_COLORS.safe.base,
                     marginRight: 6,
                     verticalAlign: "middle",
+                    border: "1px solid #000000",
                   }}
-                />
-                hijau = berhasil
+                />{" "}
+                aman
               </Text>
-              <Text size="xs" c="dimmed">
+              <Text size="xs">
                 <span
                   style={{
                     display: "inline-block",
                     width: 10,
                     height: 10,
-                    borderRadius: 999,
-                    backgroundColor: "#e03131",
+                    backgroundColor: STATUS_COLORS.unsafe.base,
                     marginRight: 6,
                     verticalAlign: "middle",
+                    border: "1px solid #000000",
                   }}
-                />
-                merah = gagal
+                />{" "}
+                tidak aman
               </Text>
             </Flex>
           </Flex>
@@ -386,23 +397,21 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                 </div>
 
                 <div
-                  className={`table-col metric-col border-left selectable-cell ${
-                    isDijkstraSelected ? "selected-cell" : ""
-                  }`}
+                  className={`table-col metric-col border-left selectable-cell ${getDijkstraStatusClass(point, isRowSelected || isDijkstraSelected)} ${isDijkstraSelected ? "selected-cell" : ""}`}
                   onClick={(event) => handleCellClick(point, "dijkstra", event)}
                 >
-                  <Text size="sm" c={getDijkstraEteColor(point)}>
+                  <Text size="sm" c="black">
                     {formatMinutes(point.ete_dijkstra)}
                   </Text>
                 </div>
 
                 <div
-                  className={`table-col rst-col border-left selectable-cell ${
-                    isDijkstraSelected ? "selected-cell" : ""
-                  }`}
+                  className={`table-col rst-col border-left selectable-cell ${getDijkstraStatusClass(point, isRowSelected || isDijkstraSelected)} ${isDijkstraSelected ? "selected-cell" : ""}`}
                   onClick={(event) => handleCellClick(point, "dijkstra", event)}
                 >
-                  <Text size="sm">{formatMinutes(point.rst_dijkstra)}</Text>
+                  <Text size="sm" c="black">
+                    {formatMinutes(point.rst_dijkstra)}
+                  </Text>
                 </div>
 
                 <div className="table-col route-col border-left selectable-cell">
@@ -412,38 +421,36 @@ function Departure({ onShowRoutes, onMapFocus, onSetNodes, onSetEdges }) {
                 </div>
 
                 <div
-                  className={`table-col metric-col border-left selectable-cell ${
-                    isDijkstraRSTSelected ? "selected-cell" : ""
-                  }`}
+                  className={`table-col metric-col border-left selectable-cell ${getUsulanStatusClass(point, isRowSelected || isDijkstraRSTSelected)} ${isDijkstraRSTSelected ? "selected-cell" : ""}`}
                   onClick={(event) =>
                     handleCellClick(point, "dijkstra_rst", event)
                   }
                 >
-                  <Text size="sm">{formatMinutes(point.ete_dijkstra_rst)}</Text>
+                  <Text size="sm" c="black">
+                    {formatMinutes(point.ete_dijkstra_rst)}
+                  </Text>
                 </div>
 
                 <div
-                  className={`table-col safe-col border-left selectable-cell ${
-                    isDijkstraRSTSelected ? "selected-cell" : ""
-                  }`}
+                  className={`table-col safe-col border-left selectable-cell ${getUsulanStatusClass(point, isRowSelected || isDijkstraRSTSelected)} ${isDijkstraRSTSelected ? "selected-cell" : ""}`}
                   onClick={(event) =>
                     handleCellClick(point, "dijkstra_rst", event)
                   }
                 >
-                  <Text size="sm" c={getUsulanSafeEteColor(point)}>
+                  <Text size="sm" c="black">
                     {formatMinutes(point.ete_safe_dijkstra_rst)}
                   </Text>
                 </div>
 
                 <div
-                  className={`table-col rst-col border-left selectable-cell ${
-                    isDijkstraRSTSelected ? "selected-cell" : ""
-                  }`}
+                  className={`table-col rst-col border-left selectable-cell ${getUsulanStatusClass(point, isRowSelected || isDijkstraRSTSelected)} ${isDijkstraRSTSelected ? "selected-cell" : ""}`}
                   onClick={(event) =>
                     handleCellClick(point, "dijkstra_rst", event)
                   }
                 >
-                  <Text size="sm">{formatMinutes(point.rst_dijkstra_rst)}</Text>
+                  <Text size="sm" c="black">
+                    {formatMinutes(point.rst_dijkstra_rst)}
+                  </Text>
                 </div>
 
                 <div className="table-col route-col border-left selectable-cell">
